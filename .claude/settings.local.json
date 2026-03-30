@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import config; import models; from config import POLL_INTERVAL; print\\(''All imports OK''\\); print\\(f''POLL_INTERVAL={POLL_INTERVAL}''\\); print\\(f''DATA_DIR={config.DATA_DIR}''\\); print\\(f''LOG_DIR={config.LOG_DIR}''\\)\")"
+    ]
+  }
+}
