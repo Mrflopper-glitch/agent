@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mango — a 2D pet for your website</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#ffe9c7; --sky-mid:#ffd6a8; --sky-low:#ffc29e;
+    --ink:#4a3728; --card:#fff8ee; --coral:#ff7a59; --mint:#7ed6a5;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    font-family:"Baloo 2","Comic Sans MS",cursive,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-low) 100%);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  .sun{
+    position:fixed; top:5%; right:7%; z-index:0;
+    width:min(20vmin,110px); height:min(20vmin,110px);
+    background:radial-gradient(circle at 40% 40%,#ffe08f,#ffcf5c);
+    border-radius:50%;
+    box-shadow:0 0 60px 24px rgba(255,207,92,.45);
+    animation:sunPulse 6s ease-in-out infinite;
+  }
+  @keyframes sunPulse{ 50%{ box-shadow:0 0 80px 34px rgba(255,207,92,.6); } }
+  .cloud{
+    position:fixed; z-index:0; background:#fff; border-radius:999px; opacity:.85;
+  }
+  .cloud::before,.cloud::after{ content:""; position:absolute; background:#fff; border-radius:50%; }
+  .cloud::before{ width:55%; height:160%; left:12%; bottom:18%; }
+  .cloud::after{ width:42%; height:120%; right:12%; bottom:26%; }
+  .c1{ width:150px; height:46px; top:14%; animation:drift 55s linear infinite; }
+  .c2{ width:100px; height:34px; top:32%; animation:drift 80s linear infinite; animation-delay:-40s; opacity:.65; }
+  @keyframes drift{ from{ transform:translateX(-30vw); } to{ transform:translateX(130vw); } }
+
+  main{
+    position:relative; z-index:1;
+    max-width:680px; margin:0 auto;
+    padding:56px 20px 220px;
+  }
+  h1{
+    font-size:clamp(34px,7vw,58px); font-weight:800; line-height:1.05;
+    letter-spacing:-.5px;
+  }
+  h1 em{ font-style:normal; color:var(--coral); }
+  .sub{
+    margin-top:14px; font-size:clamp(16px,3vw,20px); font-weight:600;
+    color:rgba(74,55,40,.75); max-width:34em;
+  }
+
+  .card{
+    margin-top:28px;
+    background:var(--card);
+    border:3px solid var(--ink);
+    border-radius:20px;
+    padding:20px 22px;
+    box-shadow:0 6px 0 rgba(74,55,40,.22);
+  }
+  .card h2{ font-size:21px; font-weight:800; margin-bottom:10px; }
+  .card p{ font-weight:600; color:rgba(74,55,40,.8); margin-bottom:10px; }
+
+  pre{
+    background:#2f2318; color:#ffe3c2;
+    border-radius:14px;
+    padding:14px 16px;
+    overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13.5px; line-height:1.55;
+  }
+  pre .k{ color:#ffb36b; }
+  pre .s{ color:#a8e6c1; }
+  code.inline{
+    background:rgba(74,55,40,.1);
+    border-radius:6px; padding:1px 7px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.9em;
+  }
+  ul{ margin:6px 0 0 20px; font-weight:600; color:rgba(74,55,40,.8); }
+  li{ margin-top:5px; }
+  .try{
+    display:inline-block;
+    background:var(--mint);
+    border:3px solid var(--ink);
+    border-radius:12px;
+    font-family:inherit; font-weight:800; font-size:14px; color:var(--ink);
+    padding:7px 13px; margin:4px 6px 0 0;
+    cursor:pointer;
+    box-shadow:0 3px 0 rgba(74,55,40,.3);
+    transition:transform .08s, box-shadow .08s;
+  }
+  .try:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(74,55,40,.3); }
+  footer{
+    margin-top:40px; text-align:center;
+    font-weight:600; color:rgba(74,55,40,.55); font-size:14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="sun"></div>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+
+<main>
+  <h1>Meet <em>Mango</em> 🧡<br>a 2D pet for your website</h1>
+  <p class="sub">
+    Mango is alive on this page right now — walking, hopping, jumping, flying around
+    the screen, dancing, and napping all on its own. Tap Mango to pet it, and open the
+    🐾 button (bottom-right) to feed it, give commands, and check its stats.
+  </p>
+
+  <div class="card">
+    <h2>✨ Try it right here</h2>
+    <p>Poke these, or type your own command in the 🐾 panel:</p>
+    <button class="try" onclick="Pet.jump()">🦘 Jump</button>
+    <button class="try" onclick="Pet.fly()">🪽 Fly</button>
+    <button class="try" onclick="Pet.dance()">🎶 Dance</button>
+    <button class="try" onclick="Pet.feed()">🍎 Feed</button>
+    <button class="try" onclick="Pet.sleep()">💤 Sleep</button>
+    <button class="try" onclick="Pet.say('You found a secret! 🌟')">💬 Say hi</button>
+    <button class="try" onclick="Pet.command('name Pip')">✏️ Rename to Pip</button>
+  </div>
+
+  <div class="card">
+    <h2>🔌 Add it to YOUR website (2 lines)</h2>
+    <p>Copy <code class="inline">pet-widget.js</code> to your site, then paste this
+       right before <code class="inline">&lt;/body&gt;</code> — works on WordPress,
+       plain HTML, anything:</p>
+<pre>&lt;<span class="k">script</span>&gt;
+  window.PetConfig = { name: <span class="s">"Mango"</span>, size: 110, controls: true };
+&lt;/<span class="k">script</span>&gt;
+&lt;<span class="k">script</span> src=<span class="s">"pet-widget.js"</span>&gt;&lt;/<span class="k">script</span>&gt;</pre>
+    <p style="margin-top:10px">For WordPress: paste the snippet into a
+       <em>Custom&nbsp;HTML</em> block, or add it in your theme footer
+       (Appearance&nbsp;→&nbsp;Theme&nbsp;File&nbsp;Editor&nbsp;→&nbsp;footer.php), or use any
+       "insert headers &amp; footers" plugin. Upload
+       <code class="inline">pet-widget.js</code> to your media/files and point
+       <code class="inline">src</code> at its URL.</p>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ Options &amp; API</h2>
+    <p>Everything is optional — the defaults just work:</p>
+<pre>window.PetConfig = {
+  name:     <span class="s">"Mango"</span>,   <span class="k">// pet's name</span>
+  size:     110,       <span class="k">// pet size in px</span>
+  controls: true,      <span class="k">// show the 🐾 panel</span>
+  bottom:   0,         <span class="k">// px above the bottom of the screen</span>
+  zIndex:   999999     <span class="k">// stacking order</span>
+};</pre>
+    <p style="margin-top:10px">Control the pet from your own code:</p>
+<pre>Pet.jump();  Pet.fly();  Pet.dance();  Pet.feed();  Pet.sleep();
+Pet.say(<span class="s">"Welcome to my site!"</span>);
+Pet.setName(<span class="s">"Pip"</span>);
+Pet.command(<span class="s">"dance"</span>);   <span class="k">// same commands as the text box</span>
+Pet.stats();             <span class="k">// { food, fun, energy, name }</span></pre>
+  </div>
+
+  <div class="card">
+    <h2>🎮 What the pet does</h2>
+    <ul>
+      <li><strong>Lives on its own</strong> — wanders, hops, jumps, flies around the whole screen, dances, and naps when tired.</li>
+      <li><strong>Tap to pet</strong> — hearts, wiggles, and happy chatter.</li>
+      <li><strong>Stats</strong> — 🍎 food, 💖 fun, ⚡ energy slowly change over time and are saved between visits.</li>
+      <li><strong>Commands</strong> — type <code class="inline">jump</code>, <code class="inline">fly</code>, <code class="inline">dance</code>, <code class="inline">sleep</code>, <code class="inline">feed</code>, <code class="inline">come</code>, <code class="inline">name Pip</code>…</li>
+      <li><strong>Mobile friendly</strong> — touch controls, safe-area aware, and it never blocks your page content.</li>
+    </ul>
+  </div>
+
+  <footer>Made with 🧡 — one tiny script, zero dependencies.</footer>
+</main>
+
+<script>
+  window.PetConfig = { name: "Mango", size: 110, controls: true };
+</script>
+<script src="pet-widget.js"></script>
+</body>
+</html>
