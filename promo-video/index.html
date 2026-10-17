@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Northvane Promo</title>
+<style>
+@font-face{font-family:'Inter Tight';font-weight:500;src:url(node_modules/@fontsource/inter-tight/files/inter-tight-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter Tight';font-weight:600;src:url(node_modules/@fontsource/inter-tight/files/inter-tight-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter Tight';font-weight:700;src:url(node_modules/@fontsource/inter-tight/files/inter-tight-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter Tight';font-weight:800;src:url(node_modules/@fontsource/inter-tight/files/inter-tight-latin-800-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter Tight';font-weight:900;src:url(node_modules/@fontsource/inter-tight/files/inter-tight-latin-900-normal.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:500;src:url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:600;src:url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:700;src:url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:800;src:url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-800-normal.woff2) format('woff2')}
+
+*{box-sizing:border-box}
+html,body{margin:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Inter Tight',sans-serif;-webkit-font-smoothing:antialiased}
+#world{position:absolute;inset:0}
+.scene{position:absolute;inset:0;display:none;overflow:hidden;background:var(--bg)}
+.cam{position:absolute;inset:0;transform-origin:50% 50%}
+.abs{position:absolute}
+.fill{position:absolute;inset:0}
+
+/* background texture */
+.grid{position:absolute;inset:-160px;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:80px 80px}
+.glow{position:absolute;width:1600px;height:1600px;border-radius:50%;left:0;top:0;margin:-800px 0 0 -800px;background:radial-gradient(circle,rgba(var(--gain-rgb),.15) 0%,rgba(var(--gain-rgb),.05) 35%,rgba(var(--gain-rgb),0) 62%)}
+.glow.gold{background:radial-gradient(circle,rgba(var(--gold-rgb),.13) 0%,rgba(var(--gold-rgb),.04) 35%,rgba(var(--gold-rgb),0) 62%)}
+#grain{position:absolute;inset:-64px;pointer-events:none;opacity:.045;z-index:50}
+#vignette{position:absolute;inset:0;pointer-events:none;z-index:49;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 58%,rgba(0,0,0,.42) 100%)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:48}
+
+/* type */
+.slam{position:absolute;left:0;top:0;white-space:nowrap;font-weight:900;letter-spacing:-.045em;word-spacing:.08em;line-height:.88;text-transform:uppercase;transform-origin:50% 50%}
+.kicker{font-family:'JetBrains Mono';font-weight:600;font-size:28px;letter-spacing:.14em;color:var(--gain);text-transform:uppercase;white-space:nowrap}
+.kicker .dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--gain);margin-right:16px;vertical-align:1px}
+.headline{font-weight:800;font-size:124px;letter-spacing:-.045em;line-height:.98;white-space:nowrap}
+.line{display:block;overflow:hidden;padding:0 .04em .08em 0;margin-bottom:-.08em}
+.line>span{display:inline-block;will-change:transform}
+.hl{color:var(--gain)}
+.goldc{color:var(--gold)}
+.dim{color:var(--text2)}
+.mono{font-family:'JetBrains Mono';font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.copyblock{position:absolute;top:50%;transform:translateY(-50%)}
+.copyblock .kicker{margin-bottom:34px}
+
+/* phone */
+.phone{position:absolute;left:0;top:0;width:430px;height:932px;margin:-466px 0 0 -215px;transform-origin:50% 50%}
+.phone .pglow{position:absolute;left:50%;top:50%;width:1300px;height:1300px;margin:-650px 0 0 -650px;border-radius:50%;background:radial-gradient(circle,rgba(var(--gain-rgb),.22) 0%,rgba(var(--gain-rgb),.07) 30%,rgba(var(--gain-rgb),0) 60%);pointer-events:none}
+.phone .body{position:absolute;inset:0;border-radius:72px;background:linear-gradient(150deg,#3a404c 0%,#14171d 18%,#0a0b0f 50%,#14171d 82%,#2f343f 100%);padding:3px;box-shadow:0 60px 140px rgba(0,0,0,.65),0 0 0 1.5px rgba(255,255,255,.24)}
+.phone .bezel{position:absolute;inset:3px;border-radius:69px;background:#010102}
+.phone .screen{position:absolute;inset:13px;border-radius:58px;overflow:hidden;background:#07090D}
+.phone .island{position:absolute;top:24px;left:50%;width:122px;height:35px;margin-left:-61px;background:#000;border-radius:20px;z-index:20}
+.phone .sheen{position:absolute;inset:13px;border-radius:58px;pointer-events:none;z-index:21;background:linear-gradient(115deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,0) 28%,rgba(255,255,255,0) 100%)}
+.sbar{position:absolute;top:0;left:0;right:0;height:58px;display:flex;align-items:center;justify-content:space-between;padding:6px 32px 0 44px;font-weight:700;font-size:17px;z-index:15}
+.sbar .ic{display:flex;gap:6px;align-items:center}
+.scr{position:absolute;top:58px;left:0;right:0;bottom:0;padding:6px 18px 0}
+
+/* app ui */
+.hdr{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 14px}
+.ttl{font-size:34px;font-weight:800;letter-spacing:-.035em}
+.sub{font-size:15px;color:var(--text2);font-weight:600;display:flex;align-items:center;gap:6px;margin-top:4px}
+.iconbtn{width:44px;height:44px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
+.chips{display:flex;gap:8px;margin-bottom:14px}
+.chip{height:38px;padding:0 16px;border-radius:19px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;font-size:15px;font-weight:700;color:var(--text2)}
+.chip.on{background:var(--gain);color:var(--onGain);border-color:transparent}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;letter-spacing:-.02em;flex:none;box-shadow:0 0 0 1.5px rgba(255,255,255,.28)}
+.tk{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:-.01em;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+.nm{font-size:18px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:6px}
+.tg{font-size:14px;color:var(--text2);font-weight:600;margin-top:3px}
+.feat{padding:16px 16px 12px;margin-bottom:12px}
+.feat .top{display:flex;align-items:center;gap:12px}
+.btn{height:40px;padding:0 18px;border-radius:20px;background:var(--text);color:#05060A;font-weight:800;font-size:15px;display:flex;align-items:center;gap:6px;margin-left:auto;white-space:nowrap}
+.btn.on{background:var(--gain);color:var(--onGain)}
+.feat .val{display:flex;align-items:baseline;gap:10px;margin-top:14px}
+.feat .val .mono{font-size:30px;font-weight:700}
+.up{color:var(--gain);font-weight:700}
+.down{color:var(--loss);font-weight:700}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:9px;height:76px}
+.row .r{margin-left:auto;text-align:right}
+.row .r .mono{font-size:17px;font-weight:700}
+.row .r .up,.row .r .down{font-size:14px;margin-top:3px}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:86px;background:rgba(10,12,17,.96);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:12px}
+.tabbar .t{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#7d8696}
+.tabbar .t.on{color:var(--gain)}
+
+.nav{display:flex;align-items:center;gap:10px;margin:2px 0 18px}
+.pill{height:34px;padding:0 14px;border-radius:17px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;margin-left:auto}
+.pill.on{background:rgba(var(--gain-rgb),.14);color:var(--gain);box-shadow:inset 0 0 0 1px rgba(var(--gain-rgb),.4)}
+.lbl{font-size:15px;color:var(--text2);font-weight:600}
+.bigv{font-size:42px;font-weight:700;margin:4px 0 4px}
+.chg{font-size:16px}
+.ranges{display:flex;justify-content:space-between;margin:6px 4px 18px}
+.ranges span{font-size:14px;font-weight:800;color:var(--text2);padding:7px 13px;border-radius:12px}
+.ranges span.on{background:var(--surface2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:0 2px 10px}
+.sec b{font-size:21px;letter-spacing:-.02em}
+.sec span{font-size:14px;color:var(--text2);font-weight:600}
+.hrow{display:flex;align-items:center;gap:12px;height:68px;padding:0 4px;border-bottom:1px solid var(--line)}
+.hrow .r{margin-left:auto;text-align:right}
+.chgpill{font-family:'JetBrains Mono';font-weight:700;font-size:15px;padding:6px 10px;border-radius:10px}
+.chgpill.up{background:rgba(var(--gain-rgb),.13)}
+.chgpill.down{background:rgba(255,84,112,.13)}
+
+.live{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:16px;background:rgba(var(--gain-rgb),.14);color:var(--gain);font-weight:800;font-size:14px;font-family:'JetBrains Mono';letter-spacing:.08em}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--gain);display:block}
+.notif{position:absolute;width:384px;height:96px;border-radius:26px;background:rgba(36,40,50,.94);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;gap:13px;padding:0 16px;box-shadow:0 24px 60px rgba(0,0,0,.55);transform-origin:50% 50%}
+.notif .ico{width:46px;height:46px;border-radius:13px;background:var(--gold);display:flex;align-items:center;justify-content:center;flex:none}
+.notif .a{font-size:14px;color:var(--text2);font-weight:700;display:flex;justify-content:space-between;width:100%}
+.notif .b{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-top:3px;white-space:nowrap}
+.notif .b em{font-style:normal;color:var(--gain)}
+.arow{position:absolute;left:18px;right:18px;height:84px;display:flex;align-items:center;gap:12px;padding:0 14px}
+.arow .txt{font-size:16px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
+.arow .txt .dim{font-weight:600;font-size:14px}
+
+.sheet{position:absolute;left:0;right:0;bottom:0;height:520px;background:#141822;border-top-left-radius:34px;border-top-right-radius:34px;border-top:1px solid rgba(255,255,255,.14);padding:12px 22px 0;z-index:10}
+.grab{width:44px;height:5px;border-radius:3px;background:#3a4150;margin:0 auto 18px}
+.sh-ttl{font-size:26px;font-weight:800;letter-spacing:-.03em}
+.sh-sub{font-size:15px;color:var(--text2);font-weight:600;margin-top:6px}
+.amt{font-size:60px;font-weight:800;text-align:center;margin:26px 0 18px}
+.slider{position:relative;height:8px;border-radius:4px;background:#2a303d;margin:0 6px}
+.slider .fl{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--gain)}
+.slider .kn{position:absolute;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.sh-row{display:flex;justify-content:space-between;font-size:15px;font-weight:600;color:var(--text2);margin:26px 4px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.sh-row b{color:var(--text);font-family:'JetBrains Mono'}
+.swipe{position:relative;height:68px;border-radius:34px;background:#232937;margin-top:26px;overflow:hidden}
+.swipe .sf{position:absolute;left:0;top:0;bottom:0;border-radius:34px;background:var(--gain)}
+.swipe .sk{position:absolute;top:6px;left:6px;width:56px;height:56px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center}
+.swipe .sl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:var(--text2)}
+.swipe .sd{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:19px;color:var(--onGain);opacity:0}
+
+.touch{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.34);border:2px solid rgba(255,255,255,.75);z-index:30;opacity:0}
+.ripple{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:3px solid var(--gain);z-index:29;opacity:0}
+
+.float{position:absolute;display:flex;align-items:center;gap:14px;padding:20px 28px;border-radius:26px;transform-origin:0 50%;background:rgba(19,23,32,.92);border:1px solid rgba(255,255,255,.16);box-shadow:0 30px 80px rgba(0,0,0,.55);font-weight:800;font-size:26px;letter-spacing:-.02em;white-space:nowrap}
+
+.ctapill{display:inline-flex;align-items:center;gap:18px;height:96px;padding:0 44px;border-radius:48px;background:var(--gain);color:var(--onGain);font-weight:800;font-size:38px;letter-spacing:-.02em;position:relative;overflow:hidden}
+.ctapill .shine{position:absolute;top:-20px;bottom:-20px;width:90px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55),rgba(255,255,255,0));transform:skewX(-20deg)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="world"></div>
+  <div id="flash"></div>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+</div>
+<script src="brand.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// Engine: every frame is a pure function of the frame number (seek(f)).
+// ---------------------------------------------------------------------------
+const FPS = 30, BEAT = 12, BAR = 48, TOTAL = 22 * BAR; // 150 BPM, 1056 frames
+const B = n => n * BEAT;
+const C = BRAND.color, K = BRAND.copy;
+const R = document.documentElement;
+for (const [k, v] of Object.entries(C)) R.style.setProperty('--' + k, v);
+const rgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(','); };
+R.style.setProperty('--gain-rgb', rgb(C.gain));
+R.style.setProperty('--gold-rgb', rgb(C.gold));
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const E = {
+  lin: t => t,
+  outCubic: t => 1 - Math.pow(1 - t, 3),
+  inCubic: t => t * t * t,
+  inOut: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  outExpo: t => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t),
+  inExpo: t => t <= 0 ? 0 : Math.pow(2, 10 * t - 10),
+  outBack: t => { const c1 = 1.7, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); },
+};
+// tween: value at frame f, moving v0->v1 between f0 and f1
+const tw = (f, f0, f1, v0, v1, e = E.outExpo) => v0 + (v1 - v0) * e(clamp((f - f0) / (f1 - f0)));
+// damped spring 0 -> 1 (with overshoot), f in frames since start
+function spring(f, d = 14, s = 170) {
+  if (f <= 0) return 0;
+  const t = f / FPS, w0 = Math.sqrt(s), z = d / (2 * w0);
+  if (z < 1) { const wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+  return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+}
+const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+function rng(seed) { let s = (seed * 2654435761) >>> 0 || 1; return () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; }
+function walk(n, seed, drift = .3, vol = 1) { const r = rng(seed), a = [0]; for (let i = 1; i < n; i++) a.push(a[i - 1] + (r() - .5 + drift * .5) * vol); return a; }
+function pathOf(a, w, h, pad = 6) {
+  const mn = Math.min(...a), mx = Math.max(...a);
+  return a.map((v, i) => `${i ? 'L' : 'M'}${(i / (a.length - 1) * w).toFixed(1)} ${(pad + (1 - (v - mn) / (mx - mn || 1)) * (h - 2 * pad)).toFixed(1)}`).join(' ');
+}
+const money = v => '$' + Math.round(v).toLocaleString('en-US');
+const short = v => '$' + (v >= 1e7 ? (v / 1e6).toFixed(1) : (v / 1e6).toFixed(2)) + 'M';
+const initials = n => n.split(' ').map(w => w[0]).join('');
+const $ = (el, s) => el.querySelector(s);
+const $$ = (el, s) => [...el.querySelectorAll(s)];
+function T(e, x = 0, y = 0, s = 1, r = 0, extra = '') { e.style.transform = `translate(${x}px,${y}px) scale(${s}) rotate(${r}deg) ${extra}`; }
+const O = (e, v) => { e.style.opacity = v; };
+
+// ---------------------------------------------------------------------------
+// Icons + UI components
+// ---------------------------------------------------------------------------
+const I = {
+  check: (s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="${C.gain}"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="${C.onGain}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  tick: (s = 18, c = C.onGain) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="${c}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  search: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${C.text}" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>`,
+  bolt: (s = 24, c = '#1a1300') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M13.5 2L4 14h7l-1.5 8L20 10h-7l.5-8z" fill="${c}"/></svg>`,
+  chevL: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${C.text}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>`,
+  arrowR: (c = '#05060A', s = 26) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
+  home: c => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>`,
+  compass: c => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="${c}"/></svg>`,
+  bell: c => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/></svg>`,
+  pie: c => `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></svg>`,
+  status: `<svg width="18" height="12" viewBox="0 0 18 12" fill="${C.text}"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+           <svg width="17" height="12" viewBox="0 0 17 12" fill="${C.text}"><path d="M8.5 2.2c2.3 0 4.4.9 6 2.4l1.3-1.3A10.3 10.3 0 008.5.4 10.3 10.3 0 001.2 3.3l1.3 1.3a8.5 8.5 0 016-2.4zm0 3.6c1.3 0 2.5.5 3.4 1.3l1.3-1.3a6.6 6.6 0 00-9.4 0l1.3 1.3c.9-.8 2.1-1.3 3.4-1.3zm0 3.6c-.4 0-.8.2-1.1.5L8.5 11l1.1-1.1c-.3-.3-.7-.5-1.1-.5z"/></svg>
+           <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="${C.text}" stroke-opacity=".45"/><rect x="2.5" y="2.5" width="17" height="8" rx="2" fill="${C.text}"/><rect x="24.5" y="4.5" width="2" height="4" rx="1" fill="${C.text}" fill-opacity=".45"/></svg>`,
+};
+const avatar = (p, s = 48) => `<div class="av" style="width:${s}px;height:${s}px;font-size:${Math.round(s * .38)}px;background:${p.hue}">${initials(p.name)}</div>`;
+const ticker = t => `<div class="tk" style="background:${BRAND.tickerFill[t] || '#334155'}">${t}</div>`;
+const statusBar = () => `<div class="sbar"><span>9:41</span><span class="ic">${I.status}</span></div>`;
+const tabbar = on => `<div class="tabbar">${[['Home', I.home], ['Discover', I.compass], ['Alerts', I.bell], ['Portfolio', I.pie]].map(([n, ic], i) => `<div class="t ${i === on ? 'on' : ''}">${ic(i === on ? C.gain : '#7d8696')}${n}</div>`).join('')}</div>`;
+const phone = (inner, cls = '') => `<div class="phone ${cls}"><div class="pglow"></div><div class="body"><div class="bezel"></div><div class="screen">${statusBar()}${inner}</div><div class="sheen"></div><div class="island"></div></div></div>`;
+const spark = (seed, w, h, color = C.gain, drift = .5) => `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${pathOf(walk(40, seed, drift, 1.2), w, h, 3)}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+
+// --- Screen: Discover feed --------------------------------------------------
+function feedScreen() {
+  const [f, ...rest] = BRAND.investors;
+  return `<div class="scr">
+    <div class="hdr"><div><div class="ttl">Discover</div><div class="sub">${I.check(16)} Verified · $1M+ portfolios</div></div><div class="iconbtn">${I.search}</div></div>
+    <div class="chips"><span class="chip on">Top 1%</span><span class="chip">Trending</span><span class="chip">Crypto</span><span class="chip">AI</span></div>
+    <div class="card feat fi">
+      <div class="top">${avatar(f, 54)}<div><div class="nm">${f.name} ${I.check(17)}</div><div class="tg">${f.tag} · 12.4k</div></div>
+        <div class="btn fbtn"><span class="fb0">Follow</span><span class="fb1" style="display:none">${I.tick(16)} Following</span></div></div>
+      <div class="val"><span class="mono fval">${short(f.value)}</span><span class="up mono">+${f.ytd}% YTD</span></div>
+      <div style="margin-top:8px">${spark(7, 334, 54)}</div>
+    </div>
+    ${rest.slice(0, 4).map(p => `<div class="card row fi">${avatar(p, 48)}<div><div class="nm">${p.name} ${I.check(15)}</div><div class="tg">${p.tag}</div></div>
+      <div class="r"><div class="mono">${short(p.value)}</div><div class="up mono">+${p.ytd}%</div></div></div>`).join('')}
+  </div>${tabbar(1)}`;
+}
+
+// --- Screen: Portfolio detail -----------------------------------------------
+const PORT_SERIES = walk(64, 21, .42, 1.3);
+function portScreen() {
+  const p = BRAND.investors[0];
+  return `<div class="scr">
+    <div class="nav">${I.chevL}${avatar(p, 34)}<div class="nm" style="font-size:19px">${p.name} ${I.check(16)}</div><span class="pill on">${I.tick(14, C.gain)} Following</span></div>
+    <div class="lbl">Portfolio value</div>
+    <div class="bigv mono pval">${money(p.value)}</div>
+    <div class="chg up mono">▲ $212,406 · 2.95% today</div>
+    <svg class="pchart" width="368" height="200" viewBox="0 0 368 200" style="display:block;margin:10px 0 6px;overflow:visible">
+      <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.gain}" stop-opacity=".32"/><stop offset="1" stop-color="${C.gain}" stop-opacity="0"/></linearGradient>
+      <clipPath id="pclip"><rect class="pclipr" x="0" y="-20" width="368" height="240"/></clipPath></defs>
+      <g clip-path="url(#pclip)"><path class="parea" d="${pathOf(PORT_SERIES, 368, 200)} L368 200 L0 200 Z" fill="url(#pg)"/></g>
+      <path class="pline" d="${pathOf(PORT_SERIES, 368, 200)}" fill="none" stroke="${C.gain}" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle class="pdot" r="7" fill="${C.gain}"/><circle class="pring" r="7" fill="none" stroke="${C.gain}" stroke-width="2"/>
+    </svg>
+    <div class="ranges"><span>1D</span><span>1W</span><span>1M</span><span class="on">1Y</span><span>ALL</span></div>
+    <div class="sec"><b>Holdings</b><span>${BRAND.holdings.length} positions</span></div>
+    ${BRAND.holdings.map(h => `<div class="hrow hi">${ticker(h.t)}<div><div class="nm" style="font-size:17px">${h.n}</div><div class="tg">${h.w}% of portfolio</div></div>
+      <div class="r"><span class="chgpill mono ${h.ch >= 0 ? 'up' : 'down'}">${h.ch >= 0 ? '+' : ''}${h.ch.toFixed(2)}%</span></div></div>`).join('')}
+  </div>`;
+}
+
+// --- Screen: Activity (alerts) ------------------------------------------------
+function activityScreen() {
+  const inv = n => BRAND.investors.find(p => p.name === n) || BRAND.investors[0];
+  return `<div class="scr">
+    <div class="hdr"><div class="ttl">Activity</div><span class="live"><i></i>LIVE</span></div>
+    <div class="sub" style="margin:-8px 2px 16px">Trades from investors you follow</div>
+    <div class="alist" style="position:relative;height:680px;margin:0 -18px;overflow:hidden">
+      ${BRAND.alerts.map((a, i) => `<div class="card arow ar" data-i="${i}">${avatar(inv(a.who), 46)}<div class="txt">${a.who.split(' ')[0]} ${a.act} <span style="color:${C.gain}">${a.t}</span><br><span class="dim">${a.amt} · ${i === 0 ? 'just now' : (i * 7) + 's ago'}</span></div><div style="margin-left:auto">${ticker(a.t)}</div></div>`).join('')}
+    </div>
+  </div>${tabbar(2)}`;
+}
+const notifHTML = (cls = '') => { const a = BRAND.alerts[0]; return `<div class="notif ${cls}"><div class="ico">${I.bolt(26)}</div><div style="flex:1;min-width:0"><div class="a"><span>TRADE ALERT</span><span>now</span></div><div class="b">${a.who} bought <em>${a.t}</em> · ${a.amt}</div></div></div>`; };
+
+// --- Screen: Mirror trade sheet ----------------------------------------------
+function mirrorScreen() {
+  const a = BRAND.alerts[0];
+  return `<div class="scr">
+    <div class="nav">${I.chevL}${ticker(a.t)}<div><div class="nm" style="font-size:19px">${a.t}</div><div class="tg" style="margin-top:0">NVIDIA Corp.</div></div></div>
+    <div class="bigv mono" style="font-size:38px">$1,182.40</div><div class="chg up mono">▲ 3.84% today</div>
+    <div style="margin-top:12px">${spark(33, 368, 150, C.gain, .55)}</div>
+    <div class="card" style="padding:14px 16px;margin-top:14px;font-size:16px;font-weight:700">${a.who.split(' ')[0]} bought ${a.amt} · 2 min ago</div>
+    <div class="dimmer fill" style="background:rgba(0,0,0,.55);opacity:0;z-index:9;top:-58px"></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="sh-ttl">Mirror this trade</div>
+      <div class="sh-sub">Copy ${a.who.split(' ')[0]}'s ${a.t} buy at your size</div>
+      <div class="amt mono">$5,000</div>
+      <div class="slider"><div class="fl" style="width:62%"></div><div class="kn" style="left:62%"></div></div>
+      <div class="sh-row"><span>Portfolio weight</span><b>2.4% of portfolio</b></div>
+      <div class="swipe"><div class="sf" style="width:68px"></div><div class="sl">Slide to mirror</div><div class="sd">${I.tick(22)} Trade mirrored</div><div class="sk">${I.arrowR('#05060A', 26)}</div></div>
+    </div>
+  </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Scene registry
+// ---------------------------------------------------------------------------
+const world = document.getElementById('world');
+const SCENES = [];
+const SHAKES = [];   // {f, amp, dur}
+const FLASHES = [];  // frame numbers (max 3, DESIGN.md §7)
+function scene(o) {
+  const el = document.createElement('div');
+  el.className = 'scene'; el.id = o.id;
+  el.innerHTML = `<div class="cam">${o.html}</div>`;
+  world.appendChild(el);
+  o.el = el; o.cam = $(el, '.cam'); o.dur = o.to - o.from;
+  SCENES.push(o);
+  return o;
+}
+const lines = (arr, cls = '') => arr.map(t => `<span class="line ${cls}"><span>${t}</span></span>`).join('');
+function reveal(el, f, starts, dist = 112, len = 10) {
+  $$(el, '.line > span').forEach((s, i) => { const st = starts[i] ?? starts[starts.length - 1]; s.style.transform = `translateY(${tw(f, st, st + len, dist, 0)}%)`; });
+}
+function fitWidth(el, w, maxFs = 2000) {
+  el.style.fontSize = '100px';
+  const cw = el.getBoundingClientRect().width;
+  const fs = Math.min(maxFs, 100 * w / cw);
+  el.style.fontSize = fs + 'px';
+  return fs;
+}
+function centerAbs(el, cx, cy) { const r = el.getBoundingClientRect(); el.style.left = (cx - r.width / 2) + 'px'; el.style.top = (cy - r.height / 2) + 'px'; }
+// slam punch: scale 1.18 -> 1 over 3 frames + chromatic split for 4 frames
+function punch(el, t, base = 1, col = C.text) {
+  const s = base * tw(t, 0, 3, 1.18, 1, E.outCubic);
+  el.style.transform = `scale(${s})`;
+  const dx = t < 4 ? 7 * (1 - t / 4) : 0;
+  el.style.textShadow = dx ? `${dx}px 0 rgba(255,40,90,.85), ${-dx}px 0 rgba(0,230,255,.85)` : 'none';
+}
+function phoneT(el, x, y, s = 1, rz = 0, ry = 0, rx = 0) { el.style.transform = `translate(${x}px,${y}px) perspective(2400px) rotateY(${ry}deg) rotateX(${rx}deg) rotateZ(${rz}deg) scale(${s})`; }
+
+// ---- Scene 1 · Slam: MARKETS / MOVE / FAST. -------------------------------
+const TAPE = [];
+{
+  const r = rng(5), names = ['NVDA', 'AAPL', 'MSFT', 'BTC', 'TSLA', 'AMZN', 'META', 'PLTR', 'ETH', 'AMD', 'SPY', 'QQQ', 'GOOG', 'COIN'];
+  for (let row = 0; row < 9; row++) {
+    let s = '';
+    for (let i = 0; i < 16; i++) { const n = names[Math.floor(r() * names.length)], ch = (r() * 9 - 3.2); s += `<span style="margin-right:56px">${n} <b style="color:${ch >= 0 ? C.gain : C.loss}">${ch >= 0 ? '▲' : '▼'}${Math.abs(ch).toFixed(2)}%</b></span>`; }
+    TAPE.push(s);
+  }
+}
+const tapeHTML = `<div class="fill tape" style="opacity:.2">${TAPE.map((s, i) => `<div class="abs mono trow" style="left:0;top:${30 + i * 118}px;font-size:34px;font-weight:700;white-space:nowrap;color:${C.text2}">${s}${s}</div>`).join('')}</div>`;
+function tapeUpdate(el, f, speed = 14) { $$(el, '.trow').forEach((r, i) => { const w = r.scrollWidth / 2; const sp = speed * (1 + (i % 3) * .45) * (i % 2 ? 1 : -1); let x = (f * sp + i * 377) % w; if (x > 0) x -= w; r.style.transform = `translateX(${x}px)`; }); }
+
+scene({
+  id: 's1', from: 0, to: B(4),
+  html: `<div class="grid"></div><div class="glow" style="left:960px;top:540px"></div>${tapeHTML}
+    ${K.s1.map((w, i) => `<div class="slam w" style="${i === 2 ? `color:${C.gain}` : ''}">${w}</div>`).join('')}`,
+  init(el) { $$(el, '.w').forEach(w => { fitWidth(w, 1640, 520); centerAbs(w, 960, 548); }); },
+  update(f, el) {
+    tapeUpdate(el, f, 10 + f * .9);
+    $$(el, '.w').forEach((w, i) => { const st = i * 12, on = f >= st && (i === 2 || f < st + 12); w.style.display = on ? 'block' : 'none'; if (on) punch(w, f - st); });
+  },
+});
+SHAKES.push({ f: 0, amp: 14, dur: 5 }, { f: 12, amp: 14, dur: 5 }, { f: 24, amp: 18, dur: 6 });
+
+// ---- Scene 2 · Type over data: 2 AM research -------------------------------
+const CANDLES = (() => { const r = rng(11), out = []; let p = 50; for (let i = 0; i < 64; i++) { const o = p, c = p + (r() - .5) * 16, h = Math.max(o, c) + r() * 7, l = Math.min(o, c) - r() * 7; out.push({ o, c, h, l }); p = c; } return out; })();
+function candlesSVG(w, h, op = .42) {
+  const mn = Math.min(...CANDLES.map(c => c.l)), mx = Math.max(...CANDLES.map(c => c.h)), y = v => 60 + (1 - (v - mn) / (mx - mn)) * (h - 120), cw = w / CANDLES.length;
+  return `<svg class="abs" width="${w}" height="${h}" style="left:0;top:0;opacity:${op}">${[0, 1, 2, 3, 4, 5].map(i => `<line x1="0" x2="${w}" y1="${100 + i * 180}" y2="${100 + i * 180}" stroke="rgba(255,255,255,.07)" stroke-dasharray="4 8"/>`).join('')}
+    ${CANDLES.map((c, i) => { const col = c.c >= c.o ? C.gain : C.loss, x = i * cw + cw / 2; return `<g class="cdl"><line x1="${x}" x2="${x}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${col}" stroke-width="3"/><rect x="${x - cw * .32}" y="${y(Math.max(c.o, c.c))}" width="${cw * .64}" height="${Math.max(4, Math.abs(y(c.o) - y(c.c)))}" fill="${col}" rx="2"/></g>`; }).join('')}</svg>`;
+}
+scene({
+  id: 's2', from: B(4), to: B(8),
+  html: `<div class="grid"></div>${candlesSVG(1920, 1080)}
+    <div class="fill" style="background:linear-gradient(90deg,rgba(5,6,10,.94) 0%,rgba(5,6,10,.82) 46%,rgba(5,6,10,.15) 80%)"></div>
+    <div class="copyblock" style="left:120px">
+      <div class="kicker" style="color:${C.text2}"><span class="dot" style="background:${C.loss}"></span><span class="clk"></span></div>
+      <div class="headline" style="font-size:150px">${lines([K.s2.line1, K.s2.line2])}</div>
+    </div>`,
+  update(f, el) {
+    $$(el, '.cdl').forEach((c, i) => { c.style.opacity = f * 2.4 > i ? 1 : 0; });
+    $(el, '.clk').textContent = `02:47:${String(13 + Math.floor(f * 1.2)).padStart(2, '0')} AM · STILL RESEARCHING`;
+    reveal(el, f, [1, 6]);
+  },
+});
+
+// ---- Scene 3 · Stat: 10+ hrs -------------------------------------------------
+const dial = (size, op) => `<svg class="abs dial" width="${size}" height="${size}" viewBox="-100 -100 200 200" style="left:${960 - size / 2}px;top:${540 - size / 2}px;opacity:${op}">
+  ${Array.from({ length: 60 }, (_, i) => { const a = i / 60 * Math.PI * 2, r1 = i % 5 ? 92 : 86; return `<line x1="${Math.sin(a) * r1}" y1="${-Math.cos(a) * r1}" x2="${Math.sin(a) * 98}" y2="${-Math.cos(a) * 98}" stroke="${C.text}" stroke-width="${i % 5 ? .7 : 1.6}"/>`; }).join('')}
+  <circle r="78" fill="none" stroke="rgba(255,255,255,.12)" stroke-width=".6"/>
+  <g class="hand"><line x1="0" y1="8" x2="0" y2="-80" stroke="${C.loss}" stroke-width="1.6" stroke-linecap="round"/><circle r="3" fill="${C.loss}"/></g></svg>`;
+scene({
+  id: 's3', from: B(8), to: B(12),
+  html: `<div class="grid"></div>${dial(1000, .32)}
+    <div class="abs statw" style="white-space:nowrap"><span class="mono num" style="font-weight:800;font-size:440px;letter-spacing:-.06em">10</span><span class="mono" style="font-weight:700;font-size:150px;color:${C.text2};margin-left:10px">${K.s3.suffix}</span></div>
+    <div class="abs cap headline" style="font-size:76px;font-weight:700;color:${C.text2};left:0;right:0;text-align:center;top:780px">${lines([K.s3.caption])}</div>`,
+  init(el) { centerAbs($(el, '.statw'), 960, 470); },
+  update(f, el) {
+    $(el, '.num').textContent = String(Math.round(tw(f, 0, 16, 0, K.s3.value))).padStart(2, '0');
+    $(el, '.hand').setAttribute('transform', `rotate(${f * 22})`);
+    T($(el, '.statw'), 0, tw(f, 0, 10, 40, 0), tw(f, 0, 8, 1.12, 1));
+    reveal(el, f, [8]);
+  },
+});
+SHAKES.push({ f: B(8), amp: 8, dur: 4 });
+
+// ---- Scene 4 · Type over data: seven-figure investors already moved ------
+const RISE = walk(90, 4, .62, 1.4);
+scene({
+  id: 's4', from: B(12), to: B(16),
+  html: `<div class="grid"></div><div class="glow gold" style="left:1500px;top:300px"></div>
+    <svg class="abs" width="1920" height="1080" style="left:0;top:0">
+      <defs><linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.gain}" stop-opacity=".26"/><stop offset="1" stop-color="${C.gain}" stop-opacity="0"/></linearGradient>
+      <clipPath id="rclip"><rect class="rclipr" x="0" y="0" width="0" height="1080"/></clipPath></defs>
+      <g clip-path="url(#rclip)"><path d="${pathOf(RISE, 1920, 900, 0).replace(/(\d+\.?\d*) (\d+\.?\d*)/g, (m, x, y) => `${x} ${+y + 140}`)} L1920 1080 L0 1080 Z" fill="url(#rg)"/>
+      <path d="${pathOf(RISE, 1920, 900, 0).replace(/(\d+\.?\d*) (\d+\.?\d*)/g, (m, x, y) => `${x} ${+y + 140}`)}" fill="none" stroke="${C.gain}" stroke-width="5" stroke-linejoin="round" opacity=".9"/></g>
+    </svg>
+    <div class="fill" style="background:linear-gradient(90deg,rgba(5,6,10,.92) 0%,rgba(5,6,10,.7) 50%,rgba(5,6,10,0) 85%)"></div>
+    <div class="copyblock" style="left:120px">
+      <div class="headline" style="font-size:96px;color:${C.text2};margin-bottom:10px">${lines([K.s4.line1])}</div>
+      <div class="headline" style="font-size:150px">${lines([`<span class="goldc">${K.s4.hl}</span> ${K.s4.line2}`, K.s4.line3])}</div>
+    </div>`,
+  push: (f, d) => 1 + .04 * (f / d) + .16 * E.inExpo(clamp((f - (d - 12)) / 12)),
+  blur: (f, d) => 14 * E.inCubic(clamp((f - (d - 5)) / 5)),
+  update(f, el) {
+    $(el, '.rclipr').setAttribute('width', tw(f, 0, 44, 0, 1920, E.inOut));
+    reveal(el, f, [0, 6, 24]);
+  },
+});
+
+// ---- Scene 5 · Slam (the drop): SEE THEIR PORTFOLIOS. / LIVE. ------------
+scene({
+  id: 's5', from: B(16), to: B(20),
+  html: `<div class="grid"></div><div class="glow" style="left:960px;top:540px"></div>
+    <div class="abs pa"><div class="slam a1" style="position:relative;text-align:center">${K.s5[0]}</div><div class="slam a2" style="position:relative;text-align:center;color:${C.gain}">${K.s5[1]}</div></div>
+    <div class="fill pb" style="background:${C.gain};display:none">
+      <div class="abs lv" style="display:flex;align-items:center;gap:.12em;white-space:nowrap"><span class="ldot" style="display:block;width:.42em;height:.42em;border-radius:50%;background:${C.onGain}"></span><span class="slam" style="position:relative;color:${C.onGain}">${K.s5[2]}</span></div>
+    </div>`,
+  init(el) {
+    const a2 = $(el, '.a2'), fs = fitWidth(a2, 1700, 600); $(el, '.a1').style.fontSize = fs + 'px';
+    centerAbs($(el, '.pa'), 960, 540);
+    $(el, '.pb').style.display = 'block';
+    const lv = $(el, '.lv'); lv.style.fontSize = '100px'; const w = lv.getBoundingClientRect().width; lv.style.fontSize = Math.min(560, 100 * 1400 / w) + 'px'; $(lv, '.slam').style.fontSize = '1em'; centerAbs(lv, 960, 560);
+    $(el, '.pb').style.display = 'none';
+  },
+  update(f, el) {
+    const A = f < 24;
+    $(el, '.pa').style.display = A ? 'block' : 'none'; $(el, '.pb').style.display = A ? 'none' : 'block';
+    if (A) { punch($(el, '.a1'), f); punch($(el, '.a2'), Math.max(0, f - 4)); $(el, '.a2').style.opacity = f >= 4 ? 1 : 0; }
+    else { punch($(el, '.lv'), f - 24); $(el, '.ldot').style.opacity = ((f - 24) % 12) < 7 ? 1 : .25; }
+  },
+});
+FLASHES.push(B(16));
+SHAKES.push({ f: B(16), amp: 26, dur: 8 }, { f: B(18), amp: 18, dur: 6 });
+
+// ---- Scene 6 · Device split: Introducing ------------------------------------
+scene({
+  id: 's6', from: B(20), to: B(24),
+  html: `<div class="grid"></div><div class="glow" style="left:1460px;top:560px"></div>
+    <div class="copyblock" style="left:120px">
+      <div class="kicker">${K.s6.kicker}</div>
+      <div class="headline" style="font-size:132px">${lines([`${K.s6.line1} <span class="goldc">${K.s6.hl}</span>`, K.s6.line2, K.s6.line3])}</div>
+    </div>
+    ${phone(feedScreen(), 'ph')}`,
+  whipOut: 'left',
+  update(f, el) {
+    const s = spring(f, 15, 150);
+    phoneT($(el, '.ph'), 1450, 548 + (1 - s) * 760, 1.04, -4 + (1 - s) * 22, -14 + (1 - s) * -20, 4);
+    $$(el, '.fi').forEach((c, i) => { const p = spring(f - 8 - i * 3, 16, 220); c.style.opacity = clamp(p * 1.4); c.style.transform = `translateY(${(1 - p) * 40}px)`; });
+    reveal(el, f, [2, 6, 10]);
+    $(el, '.kicker').style.opacity = tw(f, 0, 6, 0, 1);
+  },
+});
+
+// ---- Scene 7 · Device split (mirrored): Follow -----------------------------
+scene({
+  id: 's7', from: B(24), to: B(32),
+  html: `<div class="grid"></div><div class="glow" style="left:470px;top:560px"></div>
+    ${phone(feedScreen(), 'ph')}
+    <div class="float c1">${I.check(30)} Verified $1M+</div>
+    <div class="float c2"><span class="mono up" style="font-size:30px">+${BRAND.investors[1].ytd}%</span><span class="dim" style="font-size:22px">YTD</span></div>
+    <div class="copyblock" style="left:900px">
+      <div class="kicker">${K.s7.kicker}</div>
+      <div class="headline" style="font-size:128px">${lines([K.s7.line1, `<span class="goldc">${K.s7.hl}</span>`, K.s7.line2])}</div>
+    </div>`,
+  whipIn: 'left',
+  update(f, el) {
+    const ph = $(el, '.ph');
+    phoneT(ph, 470, 548, 1.04, 3, 12, 3);
+    reveal(el, f, [3, 7, 11]);
+    $(el, '.kicker').style.opacity = tw(f, 0, 6, 0, 1);
+    const pc = (k, x, y, st) => { const e = $(el, k), p = spring(f - st, 13, 200); e.style.opacity = clamp(p * 1.5); e.style.left = x + 'px'; e.style.top = (y + Math.sin((f + st) / 14) * 6) + 'px'; e.style.transform = `scale(${(.6 + .4 * p) * 1.2})`; };
+    pc('.c1', 900, 830, 16); pc('.c2', 1290, 830, 20);
+    // tap Follow on the beat
+    const btn = $(ph, '.fbtn'), tapF = 48;
+    let touch = ph.querySelector('.touch');
+    if (!touch) { const sc = $(ph, '.screen'); sc.insertAdjacentHTML('beforeend', '<div class="touch"></div><div class="ripple"></div>'); touch = $(ph, '.touch'); }
+    const rp = $(ph, '.ripple');
+    const bx = 330, by = 58 + 6 + 72 + 52 + 14 + 16 + 27; // button centre in screen coords
+    touch.style.left = bx + 'px'; touch.style.top = by + 'px'; rp.style.left = bx + 'px'; rp.style.top = by + 'px';
+    O(touch, f >= tapF - 12 && f < tapF + 10 ? tw(f, tapF - 12, tapF - 6, 0, 1) * tw(f, tapF + 4, tapF + 10, 1, 0, E.lin) : 0);
+    touch.style.transform = `scale(${f >= tapF && f < tapF + 4 ? .8 : 1})`;
+    const rpt = f - tapF; O(rp, rpt >= 0 && rpt < 14 ? 1 - rpt / 14 : 0); rp.style.transform = `scale(${1 + rpt * .25})`;
+    const on = f >= tapF + 2; btn.classList.toggle('on', on); $(btn, '.fb0').style.display = on ? 'none' : ''; $(btn, '.fb1').style.display = on ? 'flex' : 'none';
+    $(btn, '.fb1').style.alignItems = 'center'; $(btn, '.fb1').style.gap = '6px';
+    btn.style.transform = `scale(${f >= tapF && f < tapF + 3 ? .9 : 1 + .08 * Math.max(0, 1 - Math.abs(f - tapF - 5) / 5)})`;
+    $(ph, '.fval').textContent = short(BRAND.investors[0].value * tw(f, 0, 24, .82, 1));
+  },
+});
+
+// ---- Scene 8 · UI close-up: portfolio ----------------------------------------
+scene({
+  id: 's8', from: B(32), to: B(40),
+  html: `<div class="grid"></div><div class="glow" style="left:1340px;top:620px"></div>
+    ${phone(portScreen(), 'ph')}
+    <div class="copyblock" style="left:110px;top:330px">
+      <div class="kicker">${K.s8.kicker}</div>
+      <div class="headline" style="font-size:116px">${lines([K.s8.line1, `${K.s8.line2} <span class="hl">${K.s8.hl}</span>`])}</div>
+    </div>
+    <div class="float c3">${ticker('NVDA')}<div><div style="font-size:26px">NVIDIA</div><div class="dim" style="font-size:18px;font-weight:600">24.1% of portfolio</div></div><span class="chgpill mono up" style="font-size:26px;margin-left:12px">+3.84%</span></div>`,
+  init(el) {
+    const pl = $(el, '.pline'); el._len = pl.getTotalLength(); pl.style.strokeDasharray = el._len;
+    el._pts = Array.from({ length: 101 }, (_, i) => pl.getPointAtLength(el._len * i / 100));
+  },
+  whipIn: 'up',
+  update(f, el) {
+    const ph = $(el, '.ph');
+    const pan = tw(f, 46, 60, 0, 1, E.inOut);
+    phoneT(ph, 1350, 840 - pan * 520, 1.62, -5, -8, 0);
+    const p = tw(f, 2, 34, 0, 1, E.outCubic);
+    $(ph, '.pline').style.strokeDashoffset = el._len * (1 - p);
+    $(ph, '.pclipr').setAttribute('width', 368 * p);
+    const pt = el._pts[Math.round(p * 100)];
+    for (const k of ['.pdot', '.pring']) { $(ph, k).setAttribute('cx', pt.x); $(ph, k).setAttribute('cy', pt.y); }
+    const rp = ((f) % 18) / 18; $(ph, '.pring').setAttribute('r', 7 + rp * 16); $(ph, '.pring').style.opacity = 1 - rp;
+    $(ph, '.pval').textContent = money(BRAND.investors[0].value * tw(f, 0, 30, .9, 1));
+    $$(ph, '.hi').forEach((h, i) => { const q = spring(f - 52 - i * 3, 15, 220); h.style.opacity = clamp(q * 1.4); h.style.transform = `translateX(${(1 - q) * 60}px)`; });
+    reveal(el, f, [3, 8]);
+    $(el, '.kicker').style.opacity = tw(f, 0, 6, 0, 1);
+    const c3 = $(el, '.c3'), q = spring(f - 60, 13, 200);
+    c3.style.left = '110px'; c3.style.top = (690 + Math.sin(f / 12) * 6) + 'px'; c3.style.opacity = clamp(q * 1.5); c3.style.transformOrigin = '0 50%'; c3.style.transform = `scale(${(.6 + .4 * q) * 1.3})`;
+  },
+});
+
+// ---- Scene 9 · Device split: alerts -------------------------------------------
+scene({
+  id: 's9', from: B(40), to: B(48),
+  html: `<div class="grid"></div><div class="glow gold" style="left:1300px;top:300px"></div><div class="glow" style="left:1460px;top:640px"></div>
+    ${phone(activityScreen(), 'ph')}
+    ${notifHTML('nf')}
+    <div class="copyblock" style="left:120px">
+      <div class="kicker">${K.s9.kicker}</div>
+      <div class="headline" style="font-size:136px">${lines([K.s9.line1, `<span class="hl">${K.s9.hl}</span>`, K.s9.line2])}</div>
+    </div>`,
+  whipIn: 'left',
+  update(f, el) {
+    const ph = $(el, '.ph');
+    phoneT(ph, 1460, 548, 1.04, 0, 0, 0);
+    // notification: drops into the phone, then lifts out toward the viewer
+    const nf = $(el, '.nf');
+    const sx = 1460 - 192, sy = 548 - 466 + 13 + 14;           // banner slot at top of phone screen
+    const drop = spring(f - 4, 14, 210), lift = spring(f - 20, 15, 160);
+    const x = sx + lift * -250, y = sy + (1 - drop) * -150 + lift * 150, s = 1 + lift * .5;
+    nf.style.left = x + 'px'; nf.style.top = y + 'px'; nf.style.transform = `scale(${s}) rotate(${-lift * 3}deg)`; nf.style.opacity = clamp(drop * 2);
+    nf.style.boxShadow = `0 ${24 + lift * 40}px ${60 + lift * 60}px rgba(0,0,0,.6), 0 0 0 ${lift * 2}px rgba(var(--gold-rgb),.55)`;
+    // activity cascade: newest on top, each push-down on a 16th note
+    const n = BRAND.alerts.length, T0 = BRAND.alerts.map((_, i) => 22 + (n - 1 - i) * 3); // alerts[0] is newest, arrives last
+    $$(ph, '.ar').forEach(r => {
+      const i = +r.dataset.i, ti = T0[i];
+      const a = spring(f - ti, 15, 260);
+      let idx = 0; T0.forEach((tk, k) => { if (tk > ti) idx += spring(f - tk, 15, 260); });
+      r.style.top = (idx * 94) + 'px'; r.style.opacity = clamp(a * 1.6); r.style.transform = `scale(${.9 + .1 * a})`;
+    });
+    const live = $(ph, '.live i'); live.style.opacity = (f % 12) < 7 ? 1 : .3;
+    reveal(el, f, [3, 7, 11]);
+    $(el, '.kicker').style.opacity = tw(f, 0, 6, 0, 1);
+  },
+});
+
+// ---- Scene 10 · Device split (mirrored): mirror in one tap -----------------
+scene({
+  id: 's10', from: B(48), to: B(56),
+  html: `<div class="grid"></div><div class="glow" style="left:480px;top:600px"></div>
+    ${phone(mirrorScreen(), 'ph')}
+    <svg class="abs burst" width="700" height="700" viewBox="-350 -350 700 700" style="left:130px;top:520px;opacity:0;pointer-events:none">${Array.from({ length: 14 }, (_, i) => { const a = i / 14 * Math.PI * 2; return `<line class="bl" data-a="${a}" stroke="${C.gain}" stroke-width="7" stroke-linecap="round"/>`; }).join('')}</svg>
+    <div class="float c4"><div style="width:52px;height:52px;border-radius:50%;background:${C.gain};display:flex;align-items:center;justify-content:center">${I.tick(30)}</div><div><div style="font-size:26px">Mirrored · NVDA</div><div class="mono up" style="font-size:22px">$5,000 at $1,182.40</div></div></div>
+    <div class="copyblock" style="left:910px">
+      <div class="kicker">${K.s10.kicker}</div>
+      <div class="headline" style="font-size:140px">${lines([K.s10.line1, `<span class="hl">${K.s10.hl}</span>`])}</div>
+    </div>`,
+  whipIn: 'left',
+  update(f, el) {
+    const ph = $(el, '.ph');
+    phoneT(ph, 480, 548, 1.04, -3, 10, 2);
+    const sh = spring(f - 2, 16, 190);
+    $(ph, '.sheet').style.transform = `translateY(${(1 - sh) * 540}px)`; O($(ph, '.dimmer'), clamp(sh));
+    const amt = tw(f, 12, 32, 0, 1, E.outCubic);
+    $(ph, '.amt').textContent = money(5000 * amt);
+    $(ph, '.slider .fl').style.width = (62 * amt) + '%'; $(ph, '.slider .kn').style.left = (62 * amt) + '%';
+    // swipe on the beat (local 48 = beat 52)
+    const sw = tw(f, 46, 56, 0, 1, E.inOut), sk = $(ph, '.sk'), track = 404 - 44 - 12 - 56;
+    sk.style.transform = `translateX(${sw * track}px)`;
+    $(ph, '.sf').style.width = (68 + sw * track) + 'px';
+    $(ph, '.sl').style.opacity = 1 - sw;
+    const done = f >= 56; O($(ph, '.sd'), done ? 1 : 0); sk.style.opacity = done ? tw(f, 56, 60, 1, 0) : 1;
+    let touch = ph.querySelector('.touch');
+    if (!touch) { $(ph, '.screen').insertAdjacentHTML('beforeend', '<div class="touch"></div>'); touch = $(ph, '.touch'); }
+    const sy = 906 - 520 + 12 + 23 + 26 + 18 + 60 + 26 + 18 + 8 + 26 + 15 + 14 + 26 + 34;
+    touch.style.left = (22 + 34 + sw * track) + 'px'; touch.style.top = sy + 'px';
+    O(touch, f >= 38 && f < 60 ? tw(f, 38, 44, 0, 1) * tw(f, 56, 60, 1, 0, E.lin) : 0);
+    // success burst
+    const bt = f - 56, b = $(el, '.burst');
+    O(b, bt >= 0 && bt < 16 ? 1 - bt / 16 : 0);
+    $$(b, '.bl').forEach(l => { const a = +l.dataset.a, r1 = 70 + bt * 18, r2 = r1 + 50 - bt * 2; l.setAttribute('x1', Math.cos(a) * r1); l.setAttribute('y1', Math.sin(a) * r1); l.setAttribute('x2', Math.cos(a) * r2); l.setAttribute('y2', Math.sin(a) * r2); });
+    const c4 = $(el, '.c4'), q = spring(f - 60, 13, 200);
+    c4.style.left = '910px'; c4.style.top = (790 + Math.sin(f / 12) * 6) + 'px'; O(c4, clamp(q * 1.5)); c4.style.transform = `scale(${(.6 + .4 * q) * 1.2})`;
+    reveal(el, f, [3, 8]);
+    $(el, '.kicker').style.opacity = tw(f, 0, 6, 0, 1);
+  },
+});
+SHAKES.push({ f: B(48) + 56, amp: 6, dur: 4 });
+
+// ---- Scene 11 · Stat: 10 hrs -> 10 min ------------------------------------------
+scene({
+  id: 's11', from: B(56), to: B(64),
+  html: `<div class="grid"></div>${dial(1000, .22)}<div class="glow" style="left:960px;top:560px"></div>
+    <div class="abs from" style="white-space:nowrap"><span class="mono" style="font-weight:800;font-size:300px;letter-spacing:-.06em;word-spacing:-.32em">${K.s11.from}</span>
+      <svg class="abs strike" width="100%" height="60" style="left:0;top:50%;margin-top:-20px;overflow:visible" preserveAspectRatio="none" viewBox="0 0 100 10"><line x1="-4" y1="5" x2="104" y2="5" stroke="${C.loss}" stroke-width="5" vector-effect="non-scaling-stroke" style="stroke-width:22px" stroke-linecap="round"/></svg></div>
+    <div class="abs to" style="white-space:nowrap;color:${C.gain}"><span class="mono" style="font-weight:800;font-size:380px;letter-spacing:-.06em;word-spacing:-.32em">${K.s11.to}</span></div>
+    <div class="abs headline" style="font-size:76px;font-weight:700;color:${C.text2};left:0;right:0;text-align:center;top:800px">${lines([K.s11.caption])}</div>`,
+  init(el) { centerAbs($(el, '.from'), 960, 470); centerAbs($(el, '.to'), 960, 500); el._sl = $(el, '.strike line'); },
+  update(f, el) {
+    const fr = $(el, '.from'), to = $(el, '.to');
+    const st = tw(f, 22, 28, 0, 1, E.outCubic);
+    el._sl.setAttribute('x2', -4 + 108 * st);
+    const mv = tw(f, 30, 38, 0, 1, E.outExpo);
+    T(fr, 0, tw(f, 0, 10, 40, 0) - mv * 300, 1 - mv * .5); O(fr, 1 - mv * .62);
+    to.style.display = f >= 36 ? 'block' : 'none'; if (f >= 36) punch(to, f - 36);
+    $(el, '.hand').setAttribute('transform', `rotate(${f < 36 ? f * 20 : 720 + (f - 36) * 1.2})`);
+    reveal(el, f, [40]);
+  },
+});
+SHAKES.push({ f: B(56) + 36, amp: 16, dur: 6 });
+
+// ---- Scene 12 · Device trio ---------------------------------------------------
+scene({
+  id: 's12', from: B(64), to: B(68),
+  html: `<div class="grid"></div><div class="glow" style="left:960px;top:760px"></div>
+    <div class="abs headline tt" style="font-size:112px;left:0;right:0;text-align:center;top:70px">${lines([`${K.s12.line1} <span class="hl">${K.s12.hl}</span>`])}</div>
+    ${phone(feedScreen(), 'p1')}${phone(mirrorScreen(), 'p3')}${phone(portScreen(), 'p2')}`,
+  init(el) {
+    const p3 = $(el, '.p3'); $(p3, '.sheet').style.transform = 'none'; O($(p3, '.dimmer'), 1);
+    $(p3, '.sk').style.transform = `translateX(${404 - 44 - 12 - 56}px)`; O($(p3, '.sk'), 0); $(p3, '.sf').style.width = '100%'; O($(p3, '.sl'), 0); O($(p3, '.sd'), 1);
+    const b = $(el, '.p1 .fbtn'); b.classList.add('on'); $(b, '.fb0').style.display = 'none'; Object.assign($(b, '.fb1').style, { display: 'flex', alignItems: 'center', gap: '6px' });
+    const pl = $(el, '.p2 .pline'), L = pl.getTotalLength(), pt = pl.getPointAtLength(L);
+    for (const k of ['.pdot', '.pring']) { $(el, '.p2 ' + k).setAttribute('cx', pt.x); $(el, '.p2 ' + k).setAttribute('cy', pt.y); }
+  },
+  update(f, el) {
+    const conf = [['.p1', 520, -9, 4], ['.p2', 960, 0, 0], ['.p3', 1400, 9, 8]];
+    conf.forEach(([k, x, r, st]) => { const s = spring(f - st, 15, 170); phoneT($(el, k), x + (x - 960) * (1 - s) * .3, 830 + (1 - s) * 700 - (k === '.p2' ? 40 : 0), k === '.p2' ? 1.02 : .9, r * (.4 + .6 * s), 0, 0); });
+    reveal(el, f, [2]);
+  },
+});
+
+// ---- Scene 13 · Slam rapid fire + number strobe ------------------------------
+const STROBE = [`+${BRAND.investors[0].ytd}%`, short(BRAND.investors[0].value), `+${BRAND.investors[2].ytd}%`, short(BRAND.investors[3].value)];
+scene({
+  id: 's13', from: B(68), to: B(76),
+  html: `<div class="fill bgx"></div><div class="grid"></div>
+    ${K.s13.map((w, i) => `<div class="slam r" style="color:${i === 1 ? C.onGain : C.text}">${w}</div>`).join('')}
+    ${STROBE.map((w, i) => `<div class="slam mono st" style="font-weight:800;color:${i % 2 ? C.onGain : C.gain}">${w}</div>`).join('')}`,
+  init(el) { $$(el, '.r').forEach(w => { fitWidth(w, 1620, 520); centerAbs(w, 960, 548); }); $$(el, '.st').forEach(w => { fitWidth(w, 1500, 520); centerAbs(w, 960, 548); }); },
+  update(f, el) {
+    const seg = Math.floor(f / 24);
+    const greenBg = seg === 1 || (seg === 3 && Math.floor((f - 72) / 6) % 2 === 1);
+    $(el, '.bgx').style.background = greenBg ? C.gain : C.bg;
+    $$(el, '.r').forEach((w, i) => { const on = seg === i; w.style.display = on ? 'block' : 'none'; if (on) punch(w, f - i * 24); });
+    $$(el, '.st').forEach((w, i) => { const on = seg === 3 && Math.floor((f - 72) / 6) === i; w.style.display = on ? 'block' : 'none'; if (on) punch(w, f - 72 - i * 6); });
+  },
+  push: (f, d) => 1 + .06 * ((f % 24) / 24),
+});
+FLASHES.push(B(68));
+SHAKES.push({ f: B(68), amp: 22, dur: 6 }, { f: B(70), amp: 22, dur: 6 }, { f: B(72), amp: 22, dur: 6 }, { f: B(74), amp: 12, dur: 24 });
+
+// ---- Scene 14 · End card (the one and only logo) ----------------------------
+const LOGO = s => `<svg width="${s}" height="${s}" viewBox="0 0 100 100" class="mark">
+  <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.gain}"/><stop offset="1" stop-color="#10C98A"/></linearGradient></defs>
+  <rect class="mbg" x="2" y="2" width="96" height="96" rx="26" fill="url(#lg)"/>
+  <path class="mN" d="M29 74 V30 L68 72 V30" fill="none" stroke="${C.onGain}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="mA" d="M56 41 L68 28 L80 41" fill="none" stroke="${C.onGain}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+scene({
+  id: 's14', from: B(76), to: TOTAL,
+  html: `<div class="grid"></div><div class="glow" style="left:960px;top:470px;width:2000px;height:2000px;margin:-1000px 0 0 -1000px"></div>
+    <div class="fill parts">${Array.from({ length: 34 }, (_, i) => `<i class="pt" style="position:absolute;width:${3 + (i % 3) * 2}px;height:${3 + (i % 3) * 2}px;border-radius:50%;background:${C.gain}"></i>`).join('')}</div>
+    <div class="abs lock" style="display:flex;align-items:center;gap:44px">
+      <div class="mk">${LOGO(232)}</div>
+      <div class="wm" style="font-weight:800;font-size:212px;letter-spacing:-.05em;line-height:1;white-space:nowrap;display:flex;overflow:hidden;padding:0 .05em .12em 0">${[...BRAND.name].map(ch => `<span class="ch" style="display:inline-block">${ch}</span>`).join('')}</div>
+    </div>
+    <div class="abs headline tg2" style="font-size:84px;font-weight:700;left:0;right:0;text-align:center;top:690px">${lines([`${BRAND.tagline[0]} <span class="goldc">${BRAND.tagline[1]}</span>`])}</div>
+    <div class="abs ctaw" style="left:0;right:0;top:850px;text-align:center"><div class="ctapill">${BRAND.cta}<span style="opacity:.55">·</span><span class="mono" style="font-size:34px;font-weight:700">${BRAND.domain}</span>${I.arrowR(C.onGain, 34)}<span class="shine"></span></div></div>
+    <div class="fill fade" style="background:#000;opacity:0"></div>`,
+  init(el) {
+    centerAbs($(el, '.lock'), 960, 420);
+    for (const k of ['.mN', '.mA']) { const p = $(el, k), L = p.getTotalLength(); p.style.strokeDasharray = L; p.dataset.l = L; }
+  },
+  push: (f, d) => 1.06 - .06 * E.outCubic(f / d),
+  update(f, el) {
+    const ms = spring(f, 12, 150);
+    $(el, '.mk').style.transform = `scale(${.3 + .7 * ms}) rotate(${(1 - ms) * -25}deg)`; O($(el, '.mk'), clamp(ms * 2));
+    const n = $(el, '.mN'), a = $(el, '.mA');
+    n.style.strokeDashoffset = n.dataset.l * (1 - tw(f, 3, 20, 0, 1, E.inOut));
+    a.style.strokeDashoffset = a.dataset.l * (1 - tw(f, 16, 24, 0, 1, E.outCubic));
+    $$(el, '.ch').forEach((c, i) => { const q = spring(f - 8 - i * 1.5, 15, 220); c.style.transform = `translateY(${(1 - q) * 110}%)`; });
+    reveal(el, f, [30]);
+    const cq = spring(f - 42, 13, 190), cw = $(el, '.ctaw'); O(cw, clamp(cq * 1.5)); cw.style.transform = `translateY(${(1 - cq) * 40}px) scale(${.85 + .15 * cq})`;
+    $(el, '.shine').style.left = tw(f, 70, 92, -120, 900, E.inOut) + 'px';
+    $$(el, '.pt').forEach((p, i) => { const x = hash(i) * 1920, sp = 1.2 + hash(i + 50) * 2.4, y = 1080 - ((f * sp + hash(i + 9) * 1080) % 1180); p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.opacity = .15 + .35 * hash(i + 3); });
+    O($(el, '.fade'), tw(f, 134, 144, 0, 1, E.lin));
+  },
+});
+FLASHES.push(B(76));
+SHAKES.push({ f: B(76), amp: 12, dur: 6 });
+
+// ---------------------------------------------------------------------------
+// Global effects: grain, flash, shake, camera push, whip transitions
+// ---------------------------------------------------------------------------
+const grain = document.getElementById('grain');
+{
+  const cv = document.createElement('canvas'); cv.width = cv.height = 256; const x = cv.getContext('2d'), d = x.createImageData(256, 256), r = rng(99);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  x.putImageData(d, 0, 0); grain.style.backgroundImage = `url(${cv.toDataURL()})`;
+}
+const flash = document.getElementById('flash');
+const WHIP = 4, WD = 260, WB = 26;
+function seek(F) {
+  F = Math.max(0, Math.min(TOTAL - 1, Math.round(F)));
+  for (let i = 0; i < SCENES.length; i++) {
+    const s = SCENES[i], on = F >= s.from && F < s.to;
+    s.el.style.display = on ? 'block' : 'none';
+    if (!on) continue;
+    const f = F - s.from, d = s.dur;
+    s.update(f, s.el, F);
+    let sc = s.push ? s.push(f, d) : 1 + .05 * (f / d), x = 0, y = 0, bl = s.blur ? s.blur(f, d) : 0;
+    const dir = v => v === 'up' ? [0, -1] : [-1, 0];
+    if (s.whipOut && f >= d - WHIP) { const p = E.inCubic((f - (d - WHIP) + 1) / WHIP), [dx, dy] = dir(s.whipOut); x += dx * WD * p; y += dy * WD * p; bl = Math.max(bl, WB * p); }
+    if (s.whipIn && f < WHIP) { const p = 1 - E.outCubic((f + 1) / (WHIP + 1)), [dx, dy] = dir(s.whipIn); x -= dx * WD * p; y -= dy * WD * p; bl = Math.max(bl, WB * p); }
+    s.cam.style.transform = `translate(${x}px,${y}px) scale(${sc})`;
+    s.cam.style.filter = bl > .3 ? `blur(${bl.toFixed(1)}px)` : 'none';
+    const g = $(s.el, '.grid'); if (g) g.style.transform = `translate(${-(F * .8) % 80}px,${-(F * .5) % 80}px)`;
+  }
+  let fo = 0; for (const f0 of FLASHES) { const t = F - f0; if (t >= 0 && t < 6) fo = Math.max(fo, .9 * (1 - t / 6)); }
+  flash.style.opacity = fo;
+  let sx = 0, sy = 0; for (const k of SHAKES) { const t = F - k.f; if (t >= 0 && t < k.dur) { const a = k.amp * (1 - t / k.dur); sx += (hash(F * 3.1) - .5) * 2 * a; sy += (hash(F * 7.7 + 1) - .5) * 2 * a; } }
+  const cover = 1 + Math.max(Math.abs(sx) / 940, Math.abs(sy) / 520) * 1.08;
+  world.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) scale(${cover.toFixed(4)})`;
+  const G = Math.floor(F / 2); // grain at 15 fps: filmic, and compresses far better
+  grain.style.transform = `translate(${-Math.floor(hash(G) * 64)}px,${-Math.floor(hash(G + 0.5) * 64)}px)`;
+  window.FRAME = F;
+}
+window.seek = seek; window.TOTAL = TOTAL; window.FPS = FPS;
+
+const FACES = ['500','600','700','800','900'].map(w => `${w} 100px "Inter Tight"`).concat(['500','600','700','800'].map(w => `${w} 100px "JetBrains Mono"`));
+Promise.all(FACES.map(f => document.fonts.load(f))).then(() => document.fonts.ready).then(() => {
+  for (const s of SCENES) { s.el.style.display = 'block'; s.init && s.init(s.el); s.el.style.display = 'none'; }
+  seek(0);
+  window.READY = true;
+  // Preview mode: open index.html directly to watch it loop (with soundtrack if rendered).
+  if (!/render/.test(location.search)) {
+    const fit = () => { const st = document.getElementById('stage'), k = Math.min(innerWidth / 1920, innerHeight / 1080); st.style.transformOrigin = '0 0'; st.style.transform = `scale(${k})`; };
+    fit(); addEventListener('resize', fit);
+    const au = new Audio('out/soundtrack.wav'); let t0 = null;
+    addEventListener('click', () => { au.currentTime = 0; au.play().catch(() => {}); t0 = performance.now(); });
+    const loop = now => { if (t0 === null) t0 = now; const F = ((now - t0) / 1000 * FPS) % TOTAL; seek(F); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+</body>
+</html>
