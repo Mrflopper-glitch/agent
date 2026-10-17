@@ -1,0 +1,16 @@
+{
+  "name": "northvane-promo",
+  "version": "1.0.0",
+  "description": "30-40s promo video rendered from HTML",
+  "scripts": {
+    "stills": "node render.mjs stills",
+    "video": "python3 soundtrack.py && node render.mjs video"
+  },
+  "dependencies": {
+    "@fontsource/inter-tight": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "playwright": "^1.56.1"
+  },
+  "private": true,
+  "type": "module"
+}
