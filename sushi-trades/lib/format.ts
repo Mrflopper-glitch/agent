@@ -4,6 +4,7 @@ const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" 
 const usdWhole = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const plain = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
+const compactMoney = new Intl.NumberFormat("en-US", { notation: "compact", maximumSignificantDigits: 3 });
 
 /** $184,325.12 */
 export function money(value: number): string {
@@ -15,9 +16,9 @@ export function moneyWhole(value: number): string {
   return usdWhole.format(value);
 }
 
-/** $1.2M, $250K */
+/** $1.2M, $250K, $69.6K */
 export function moneyCompact(value: number): string {
-  return "$" + compact.format(value);
+  return "$" + compactMoney.format(value);
 }
 
 /** +$12,486.32 / -$80.10 */

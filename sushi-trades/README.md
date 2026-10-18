@@ -28,6 +28,7 @@ npm run dev          # http://localhost:3000
 | `npm test`          | Unit tests (parser, simulator, Discord ingest)  |
 | `npm run lint`      | Lint                                            |
 | `npm run typecheck` | TypeScript check                                |
+| `npm run preview:build` | Build the browser-only preview (see below)  |
 
 ## What's in the app
 
@@ -124,6 +125,14 @@ same path.
 3. If there isn't enough cash left, the trade is skipped (no borrowing).
 4. Every day it records the account's value. Today's value updates live with prices.
 5. "Road to 7 figures" projects your average growth rate forward to estimate when you'd reach $1M.
+
+## Live preview (no server)
+
+`npm run preview:build` packs the whole app into a static page in `.preview-dist/` (one HTML file plus
+`assets/app.js` and `assets/app.css`) that runs entirely in the browser, so it can be hosted anywhere,
+including as a claude.ai Artifact. It reuses every page and component; `preview/` only swaps Next.js
+routing for `#/path` links and answers the Discord API in the browser, so messages sent from Tools are
+saved in that browser only. The real Discord bot needs the full app (`npm run dev` / `npm start`).
 
 ## Going to production
 

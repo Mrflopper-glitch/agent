@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Discord data saved by the app
 /.data/
+
+# Static preview build (npm run preview:build)
+/.preview-dist/

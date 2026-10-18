@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Built preview bundle (npm run preview:build):
+    ".preview-dist/**",
   ]),
 ]);
 
