@@ -1,0 +1,26 @@
+/* The app's own styles, plus where Tailwind should look for class names. */
+@import "../app/globals.css";
+@source "../app";
+@source "../components";
+@source "../state";
+@source "./";
+
+/* Next.js loads the fonts in the real app; here they come from Google Fonts (see index.html). */
+:root {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-caveat: "Caveat", cursive;
+}
+
+/* Hosted pages can sit under a phone's status bar: keep the sticky top bar below it. */
+header.sticky {
+  top: env(safe-area-inset-top, 0px);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 50;
+  background: var(--canvas);
+}

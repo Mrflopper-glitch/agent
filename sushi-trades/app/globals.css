@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+/*
+ * Sushi Trades design tokens.
+ * Change a color here and it changes everywhere (e.g. `text-up`, `bg-brand`).
+ */
+:root {
+  --brand: #00c25a; /* logo green */
+  --brand-bright: #00d26a; /* buttons */
+  --brand-soft: #eafbf1; /* tinted backgrounds */
+  --up: #079a46; /* gains (darker than the brand green so small text stays readable) */
+  --up-line: #16c060; /* gains in charts */
+  --down: #e5484d; /* losses */
+  --down-soft: #fdecec;
+  --ink: #0b0c0e; /* main text */
+  --muted: #6b7280; /* secondary text */
+  --faint: #9ca3af;
+  --line: #eceef1; /* borders */
+  --track: #f3f4f6; /* tab tracks, progress tracks */
+  --surface: #ffffff;
+  --canvas: #fbfbfc; /* page background */
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-soft: var(--brand-soft);
+  --color-up: var(--up);
+  --color-up-line: var(--up-line);
+  --color-down: var(--down);
+  --color-down-soft: var(--down-soft);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-track: var(--track);
+  --color-surface: var(--surface);
+  --color-canvas: var(--canvas);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-hand: var(--font-caveat), cursive;
+
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.03);
+  --shadow-lift: 0 10px 30px -12px rgb(16 24 40 / 0.18);
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+/* Numbers line up neatly in tables and tickers. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Loading placeholders shimmer gently. */
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--track) 25%, #eceef1 50%, var(--track) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 0.75rem;
+}
+
+/* Slider: a thin track that fills green up to the thumb (set --fill to a percentage). */
+.range {
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--brand) var(--fill, 50%), var(--track) var(--fill, 50%));
+  cursor: pointer;
+}
+
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--brand);
+  box-shadow: 0 2px 8px rgb(16 24 40 / 0.18);
+  transition: transform 0.15s ease;
+}
+
+.range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--brand);
+}
+
+.range:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+/* The pulsing dot on "LIVE" badges. */
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.live-dot {
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+/* Thin, quiet scrollbars for scrollable lists. */
+.scroll-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .live-dot {
+    animation: none;
+  }
+}
