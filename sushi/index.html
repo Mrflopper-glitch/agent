@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SUSHI Portfolios</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Shared header for the portfolio screens -->
+  <header class="topbar" id="topbar" hidden>
+    <div class="topbar-inner">
+      <a class="brand" href="#" data-route="landing" aria-label="SUSHI home">
+        <img class="logo-light" src="assets/logo.png" alt="" width="956" height="312">
+        <img class="logo-dark" src="assets/logo-dark.png" alt="" width="956" height="312">
+      </a>
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="#portfolios" data-route="portfolios" id="crumb-portfolios">Portfolios</a>
+        <span class="crumb-sep" id="crumb-sep" aria-hidden="true" hidden>/</span>
+        <span class="crumb-current" id="crumb-current" aria-current="page" hidden></span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 1. Landing -->
+  <section class="view landing" id="view-landing" aria-label="Welcome">
+    <div class="landing-inner">
+      <h1 class="landing-logo">
+        <img class="logo-light" src="assets/logo.png" alt="SUSHI" width="956" height="312">
+        <img class="logo-dark" src="assets/logo-dark.png" alt="SUSHI" width="956" height="312">
+      </h1>
+      <p class="tagline">Every portfolio you follow, and every stock inside it, in one place.</p>
+      <button class="enter" id="enter" type="button">
+        <span class="enter-label">Enter</span>
+        <span class="enter-candle" aria-hidden="true"><span></span></span>
+      </button>
+      <p class="hint" aria-hidden="true">or press <kbd>Enter ↵</kbd></p>
+    </div>
+    <svg class="tape" id="tape" aria-hidden="true" focusable="false"></svg>
+  </section>
+
+  <!-- 2. Portfolio list -->
+  <section class="view" id="view-portfolios" aria-labelledby="portfolios-title" hidden>
+    <div class="wrap">
+      <div class="page-head">
+        <p class="eyebrow" id="portfolios-summary"></p>
+        <h2 class="display-xl" id="portfolios-title" tabindex="-1">Portfolios</h2>
+        <p class="lede">Open a portfolio to see every stock it holds.</p>
+      </div>
+      <ul class="grid" id="portfolio-grid"></ul>
+    </div>
+  </section>
+
+  <!-- 3. Portfolio detail -->
+  <section class="view" id="view-detail" aria-labelledby="detail-name" hidden>
+    <div class="wrap">
+      <a class="back" href="#portfolios" data-route="portfolios"><span aria-hidden="true">←</span> All portfolios</a>
+
+      <div class="detail-head">
+        <p class="eyebrow">Portfolio</p>
+        <h2 class="display-xxl" id="detail-name" tabindex="-1"></h2>
+        <p class="lede" id="detail-desc"></p>
+      </div>
+
+      <dl class="stats">
+        <div class="stat"><dt>Holdings</dt><dd id="stat-count">0</dd></div>
+        <div class="stat"><dt>Market value</dt><dd id="stat-value">—</dd></div>
+        <div class="stat"><dt>Cost basis</dt><dd id="stat-cost">—</dd></div>
+        <div class="stat"><dt>Unrealized P/L</dt><dd id="stat-pl">—</dd></div>
+      </dl>
+
+      <section class="panel" aria-labelledby="alloc-title">
+        <div class="panel-head">
+          <h3 id="alloc-title">Allocation</h3>
+          <span class="panel-note" id="alloc-note"></span>
+        </div>
+        <div class="alloc alloc-lg" id="alloc"></div>
+        <ul class="legend" id="legend"></ul>
+      </section>
+
+      <section class="panel" aria-labelledby="holdings-title">
+        <div class="panel-head">
+          <h3 id="holdings-title">Holdings</h3>
+          <span class="panel-note" id="holdings-note"></span>
+        </div>
+        <div class="holdings-box">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Ticker</th>
+                  <th scope="col">Company</th>
+                  <th scope="col" class="num">Shares</th>
+                  <th scope="col" class="num">Avg cost</th>
+                  <th scope="col" class="num">Price</th>
+                  <th scope="col" class="num">Market value</th>
+                  <th scope="col" class="num">P/L</th>
+                  <th scope="col" class="num">Weight</th>
+                </tr>
+              </thead>
+              <tbody id="holdings-body"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="holdings-empty" hidden>
+            <span class="glyph glyph-lg glyph-empty" aria-hidden="true"><span class="glyph-body"></span></span>
+            <p class="empty-title">No stocks yet</p>
+            <p class="empty-text">When this portfolio holds stocks, each one is listed here with its shares, cost, price and weight.</p>
+          </div>
+        </div>
+      </section>
+
+      <nav class="pager" aria-label="Other portfolios">
+        <a class="pager-link" id="pager-prev" href="#">
+          <span class="pager-label"><span aria-hidden="true">←</span> Previous</span>
+          <span class="pager-name"></span>
+        </a>
+        <a class="pager-link pager-next" id="pager-next" href="#">
+          <span class="pager-label">Next <span aria-hidden="true">→</span></span>
+          <span class="pager-name"></span>
+        </a>
+      </nav>
+    </div>
+  </section>
+
+  <div class="wipe" id="wipe" aria-hidden="true"></div>
+</div>
+
+<script src="portfolios.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
