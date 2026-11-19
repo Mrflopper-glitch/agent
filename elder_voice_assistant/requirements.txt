@@ -1,0 +1,8 @@
+flask>=3.0,<4
+requests>=2.31,<3
+python-dotenv>=1.0,<2
+gTTS>=2.5,<3
+pytest>=8,<10
+# Optional second TTS provider (set TTS_PROVIDER=edge or TTS_PROVIDER_TA=edge):
+edge-tts>=7,<8
+tzdata; sys_platform == "win32"   # zoneinfo needs this on Windows

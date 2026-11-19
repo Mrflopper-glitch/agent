@@ -1,0 +1,11 @@
+.env
+contacts.json
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+eval_samples/*.ogg
+eval_samples/*.opus
+eval_samples/*.mp3
+eval_samples/*.wav
+eval_samples/*.m4a
