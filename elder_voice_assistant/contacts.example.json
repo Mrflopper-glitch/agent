@@ -1,0 +1,20 @@
+{
+  "elders": [
+    {
+      "name": "Amma",
+      "phone": "+91 98765 43210",
+      "preferred_language": "ta",
+      "home_address": "12 Gandhi Street, Mylapore, Chennai",
+      "family_name": "Ravi",
+      "family_phone": "+44 7700 900123"
+    },
+    {
+      "name": "Dadi",
+      "phone": "+91 91234 56789",
+      "preferred_language": "hi",
+      "home_address": "",
+      "family_name": "Priya",
+      "family_phone": "+1 415 555 0134"
+    }
+  ]
+}
