@@ -93,7 +93,7 @@ PARTS = [
     ("spec", "PDM mic + MAX98357A speaker amp", "mic GPIO 47/44, I2S 48/15/46"),
     ("illustrative", "Case envelope", "~44 x 40 x 13 mm stand-in; measure before printing"),
     ("illustrative", "Board layout, bezel, glass", "positions only, not the real PCB"),
-    ("illustrative", "Pocket bow pin, ring and chain", "default carry; any 22 mm spring bar fits the lugs"),
+    ("illustrative", "Pocket bow pin, ring and chain", "default carry; lug spacing not measured"),
     ("illustrative", "Wrist strap", "OPTIONAL, not needed for pocket carry"),
 ]
 
