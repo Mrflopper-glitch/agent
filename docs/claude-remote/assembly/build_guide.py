@@ -283,7 +283,7 @@ ANCHORS = {
     "display": ((DISPLAY_ACTIVE / 2, -6, dz + 1.6), "1.54\" display + touch", "240 × 240 ST7789, FT6336 touch", "spec"),
     "bezel": ((-CASE_W / 2 + 2, 6, bz + 2), "Front bezel + glass", "stand-in for the stock front", "illustrative"),
     "carry": ((0, CASE_H / 2 + 14.5, mid), "Pocket bow + chain", "default carry, through the top lugs", "illustrative"),
-    "strap": ((0, -(CASE_H / 2 + 30), 3), "Wrist strap: OPTIONAL", "22 mm band, skip for pocket carry", "illustrative"),
+    "strap": ((0, -(CASE_H / 2 + 30), 3), "Wrist strap: OPTIONAL", "band width not measured; skip for pocket carry", "illustrative"),
 }
 PART_OF = {"speaker": "board"}
 
