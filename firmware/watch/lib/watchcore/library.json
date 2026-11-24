@@ -1,0 +1,7 @@
+{
+  "name": "watchcore",
+  "version": "0.1.0",
+  "description": "Board-independent UI, protocol and provisioning for the claude-remote watch",
+  "dependencies": [{ "owner": "bblanchon", "name": "ArduinoJson", "version": "^7.2.1" }],
+  "build": { "flags": ["-std=gnu++17"] }
+}

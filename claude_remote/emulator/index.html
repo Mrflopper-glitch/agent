@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>claude-remote watch emulator</title>
+<link rel="stylesheet" href="watch.css">
+</head>
+<body>
+<main>
+  <section class="bezel">
+    <div id="screen" class="screen" aria-live="polite">
+      <header id="bar"><span id="title">claude</span><span id="status" class="dot off"></span></header>
+      <div id="view"></div>
+      <div id="approval" class="approval" hidden>
+        <div class="tool" id="ap-tool"></div>
+        <div class="summary" id="ap-summary"></div>
+        <div class="row"><button id="ap-deny" class="deny">Deny</button><button id="ap-allow" class="allow">Allow</button></div>
+        <div class="timer" id="ap-timer"></div>
+      </div>
+    </div>
+    <button id="side" class="side" title="Hold to talk (side button)">PTT</button>
+  </section>
+  <aside class="panel">
+    <h1>Watch emulator</h1>
+    <p>240&times;240 view of the T-Watch S3 UI, speaking the same WebSocket protocol as the firmware.</p>
+    <label>Token <input id="token" type="password" placeholder="crd_..." autocomplete="off"></label>
+    <button id="connect">Connect</button>
+    <p class="hint">Get a token with <code>python -m claude_remote add-device emulator</code>. Hold the side button (or Space) to talk; type below if the relay has no STT.</p>
+    <form id="type"><input id="text" placeholder="Optional keyboard prompt" maxlength="4000"><button>Send</button></form>
+    <pre id="log"></pre>
+  </aside>
+</main>
+<script src="watch.js"></script>
+</body>
+</html>

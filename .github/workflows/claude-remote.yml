@@ -1,0 +1,35 @@
+name: claude-remote
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-remote.txt
+      - run: python -m pytest -q
+
+  firmware:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware/watch
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('firmware/watch/platformio.ini') }}
+      - run: pip install platformio
+      - run: pio test -e native
+      - run: pio run -e twatch-s3
