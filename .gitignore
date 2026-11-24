@@ -4,3 +4,7 @@ logs/
 browser_profile/
 __pycache__/
 *.pyc
+
+# claude-remote
+.venv/
+firmware/watch/.pio/
