@@ -24,6 +24,10 @@ from .media import MediaError, capture_screen, transcribe
 from .protocol import decode, encode, summarize_tool
 from .sessions import SessionManager
 
+MAX_HOOK_BODY = 256 * 1024
+# The ESP32 WebSockets client drops frames over 15 KB (WEBSOCKETS_MAX_DATA_SIZE).
+HISTORY_FRAME_BUDGET = 12 * 1024
+
 log = logging.getLogger(__name__)
 EMULATOR_DIR = Path(__file__).resolve().parent / "emulator"
 
@@ -148,7 +152,7 @@ class Relay:
         elif t == "open":
             session = self._session(msg)
             conn.subscribed = session.id
-            await conn.send("history", session=session.id, state=session.state, events=sm.history(session))
+            await conn.send("history", session=session.id, state=session.state, events=sm.history(session, HISTORY_FRAME_BUDGET))
         elif t == "new":
             workspace = self.cfg.workspace(str(msg.get("workspace", "")))
             if workspace is None:
@@ -156,7 +160,7 @@ class Relay:
             session = await sm.create(workspace, str(msg.get("text", "")))
             conn.subscribed = session.id
             self.audit(conn.device.name, "new", session=session.id, workspace=workspace.id, text=session.title)
-            await conn.send("history", session=session.id, state=session.state, events=sm.history(session))
+            await conn.send("history", session=session.id, state=session.state, events=sm.history(session, HISTORY_FRAME_BUDGET))
         elif t == "prompt":
             session = self._session(msg)
             conn.subscribed = session.id
@@ -219,7 +223,6 @@ class Relay:
         if device is None:
             await ws.close(code=4401)
             return
-        self.registry.save()
         conn = Connection(ws=ws, device=device)
         self.connections.add(conn)
         try:
@@ -250,9 +253,9 @@ class Relay:
         while True:
             await asyncio.sleep(interval_s)
             self.registry.load()
-            active = {d.name for d in self.registry.list() if not d.revoked}
+            active = {d.token_hash for d in self.registry.list() if not d.revoked}
             for conn in list(self.connections):
-                if conn.device.name not in active:
+                if conn.device.token_hash not in active:
                     log.warning("closing connection of revoked device %s", conn.device.name)
                     await conn.ws.close(code=4403)
 
@@ -267,7 +270,7 @@ class Relay:
             allow, reason = True, "auto-allowed read-only tool"
         else:
             summary = summarize_tool(tool, payload.get("tool_input"))
-            allow, by = await self.sessions._request_approval(session, tool, summary)
+            allow, by = await self.sessions.request_approval(session, tool, summary)
             reason = f"{'approved' if allow else 'denied'} from watch ({by})" if by != "timeout" else "no answer from watch"
         return {
             "hookSpecificOutput": {
@@ -302,7 +305,20 @@ def create_app(cfg: Config, registry: DeviceRegistry | None = None, backend: Bac
 
     @app.post("/internal/hook")
     async def hook_endpoint(request: Request, x_claude_remote_hook: str = Header(default="")):
-        return await relay.hook(x_claude_remote_hook, await request.json())
+        if not x_claude_remote_hook or relay.sessions.by_hook_token(x_claude_remote_hook) is None:
+            raise HTTPException(status_code=403, detail="bad hook token")
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > MAX_HOOK_BODY:
+                raise HTTPException(status_code=413, detail="hook payload too large")
+        try:
+            payload = json.loads(body)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="hook payload is not JSON") from None
+        if not isinstance(payload, dict):
+            raise HTTPException(status_code=400, detail="hook payload must be an object")
+        return await relay.hook(x_claude_remote_hook, payload)
 
     if cfg.enable_emulator:
         app.mount("/emulator", StaticFiles(directory=EMULATOR_DIR, html=True), name="emulator")

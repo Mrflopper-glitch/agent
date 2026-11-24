@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import secrets
 import time
 from collections import deque
@@ -51,7 +52,8 @@ class SessionManager:
         self.broker = broker
         self._broadcast = broadcast
         self._sessions: dict[str, Session] = {}
-        self._store = cfg.data_dir / "sessions.json"
+        # Fake sessions get their own index so their synthetic ids never reach `claude --resume`.
+        self._store = cfg.data_dir / ("sessions.json" if cfg.backend == "claude" else f"sessions-{cfg.backend}.json")
         self.hook_url = f"http://127.0.0.1:{cfg.port}/internal/hook"
         self._load()
 
@@ -69,7 +71,9 @@ class SessionManager:
         self._store.parent.mkdir(parents=True, exist_ok=True)
         data = [{"id": s.id, "workspace": s.workspace_id, "title": s.title,
                  "backend_id": s.backend_id, "updated": s.updated_at} for s in self._sessions.values()]
-        self._store.write_text(json.dumps(data, indent=2))
+        tmp = self._store.with_suffix(".tmp")
+        tmp.write_text(json.dumps(data, indent=2))
+        os.replace(tmp, self._store)
 
     def list(self) -> list[Session]:
         return sorted(self._sessions.values(), key=lambda s: s.updated_at, reverse=True)
@@ -80,8 +84,19 @@ class SessionManager:
     def by_hook_token(self, token: str) -> Session | None:
         return next((s for s in self._sessions.values() if secrets.compare_digest(s.hook_token, token)), None)
 
-    def history(self, session: Session) -> list[dict]:
-        return list(session.events)
+    def history(self, session: Session, max_bytes: int | None = None) -> list[dict]:
+        """Newest events first fitted into max_bytes of JSON, returned oldest first."""
+        events = list(session.events)
+        if max_bytes is None:
+            return events
+        kept: list[dict] = []
+        used = 0
+        for event in reversed(events):
+            used += len(json.dumps(event)) + 1
+            if used > max_bytes:
+                break
+            kept.append(event)
+        return kept[::-1]
 
     async def _emit(self, session: Session, kind: str, text: str) -> None:
         session.seq += 1
@@ -125,12 +140,16 @@ class SessionManager:
         await self._set_state(session, RUNNING)
         session.task = asyncio.create_task(self._run(session, workspace, text))
 
-    async def _request_approval(self, session: Session, tool: str, summary: str) -> bool:
+    async def request_approval(self, session: Session, tool: str, summary: str) -> tuple[bool, str]:
+        """Ask the watch about one tool call; returns (allow, who answered or "timeout")."""
         await self._set_state(session, WAITING)
         try:
-            allow, _ = await self.broker.request(session.id, tool, summary)
+            return await self.broker.request(session.id, tool, summary)
         finally:
             await self._set_state(session, RUNNING)
+
+    async def _request_approval(self, session: Session, tool: str, summary: str) -> bool:
+        allow, _ = await self.request_approval(session, tool, summary)
         return allow
 
     async def _run(self, session: Session, workspace: Workspace, text: str) -> None:

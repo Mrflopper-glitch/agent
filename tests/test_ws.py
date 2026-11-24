@@ -134,3 +134,89 @@ def test_emulator_served_when_enabled(cfg, registry):
         page = c.get("/emulator/")
         assert page.status_code == 200 and "watch.js" in page.text
         assert c.get("/emulator/watch.js").status_code == 200
+
+
+def _hook_after_watch(client, token, tool, answer):
+    import threading
+
+    relay = client.app.state.relay
+    ws, _ = login(client, token)
+    ws.send_json({"type": "new", "workspace": "repo", "text": "hi"})
+    first, _ = recv_until(ws, "approval")
+    ws.send_json({"type": "approve", "request": first["request"], "allow": True})
+    session = relay.sessions.list()[0]
+    result = {}
+
+    def call():
+        result["resp"] = client.post("/internal/hook", json={"tool_name": tool, "tool_input": {"command": "rm -rf build"}},
+                                     headers={"X-Claude-Remote-Hook": session.hook_token})
+
+    worker = threading.Thread(target=call)
+    worker.start()
+    card, _ = recv_until(ws, "approval")
+    assert card["tool"] == tool and "rm -rf build" in card["summary"]
+    if answer is not None:
+        ws.send_json({"type": "approve", "request": card["request"], "allow": answer})
+    worker.join(10)
+    return result["resp"].json()["hookSpecificOutput"]
+
+
+def test_hook_waits_for_watch_allow(client, token):
+    assert _hook_after_watch(client, token, "Bash", True)["permissionDecision"] == "allow"
+
+
+def test_hook_waits_for_watch_deny(client, token):
+    assert _hook_after_watch(client, token, "Bash", False)["permissionDecision"] == "deny"
+
+
+def test_hook_denies_on_timeout(client, token):
+    client.app.state.relay.broker.timeout_s = 0.3
+    out = _hook_after_watch(client, token, "Bash", None)
+    assert out["permissionDecision"] == "deny" and "no answer" in out["permissionDecisionReason"]
+
+
+def test_hook_rejects_oversized_body(client, token):
+    relay = client.app.state.relay
+    ws, _ = login(client, token)
+    ws.send_json({"type": "new", "workspace": "repo", "text": "hi"})
+    recv_until(ws, "approval")
+    session = relay.sessions.list()[0]
+    resp = client.post("/internal/hook", content=b"{" + b" " * (300 * 1024) + b"}",
+                       headers={"X-Claude-Remote-Hook": session.hook_token, "content-type": "application/json"})
+    assert resp.status_code == 413
+
+
+def test_history_fits_watch_frame(client, token):
+    import json
+
+    relay = client.app.state.relay
+    ws, _ = login(client, token)
+    ws.send_json({"type": "new", "workspace": "repo", "text": "hi"})
+    recv_until(ws, "approval")
+    session = relay.sessions.list()[0]
+    for i in range(200):
+        session.events.append({"session": session.id, "seq": i, "kind": "text", "text": "x" * 600})
+    ws.send_json({"type": "open", "session": session.id})
+    history, _ = recv_until(ws, "history")
+    assert len(json.dumps(history)) < 15 * 1024
+    assert history["events"][-1]["seq"] == 199
+
+
+def test_revocation_closes_replaced_device(client, registry, token):
+    relay = client.app.state.relay
+    ws, _ = login(client, token)
+    registry.revoke("watch")
+    registry.add("watch")
+    import asyncio
+
+    async def one_pass():
+        task = asyncio.create_task(relay.watch_revocations(interval_s=0))
+        await asyncio.sleep(0.05)
+        task.cancel()
+
+    client.portal.call(one_pass)
+    from starlette.websockets import WebSocketDisconnect
+
+    with pytest.raises(WebSocketDisconnect):
+        for _ in range(10):
+            ws.receive_json()
