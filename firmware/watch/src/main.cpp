@@ -283,10 +283,16 @@ void pumpTouch() {
     y = ny;
   }
   unsigned long now = millis();
-  if (down) {
-    bool wasOff = !screenOn;
+  static bool swallow = false;  // the touch that wakes the screen never reaches the UI
+  if (!screenOn && down) swallow = true;
+  if (swallow) {
     wake();
-    if (wasOff) return;  // the first touch only wakes the screen
+    if (!down) swallow = false;
+    touchWasDown = false;
+    return;
+  }
+  if (down) {
+    wake();
     if (!touchWasDown) app->touchDown(x, y, now);
     else app->touchMove(x, y);
   } else if (touchWasDown) {
