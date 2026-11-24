@@ -53,7 +53,7 @@ pio run -e twatch-s3   # compiles the T-Watch S3 image
 
 ## Run it for real
 
-1. `python -m claude_remote init-config`, then edit `~/.config/claude-remote/config.toml`: add a
+1. `python -m claude_remote init-config`, then edit the file it prints (`data/claude_remote/config.toml` in the checkout, or `$CLAUDE_REMOTE_CONFIG`): add a
    workspace per repo, and optionally a `kind = "computer"` workspace with a computer-use MCP config.
    Set `stt = "command"` with a local whisper.cpp command for push-to-talk.
 2. `python -m claude_remote add-device my-watch` and keep the printed `crd_...` token.
@@ -62,7 +62,7 @@ pio run -e twatch-s3   # compiles the T-Watch S3 image
 4. Flash: `cd firmware/watch && pio run -e twatch-s3 -t upload`, then in `pio device monitor`:
 
    ```
-   hotspot <phone-hotspot-ssid> <password>
+   hotspot "<phone hotspot ssid>" <password>
    wifi <home-ssid> <password>          # optional, up to 3
    relay wss://<your-tunnel-host>/ws
    token crd_...
