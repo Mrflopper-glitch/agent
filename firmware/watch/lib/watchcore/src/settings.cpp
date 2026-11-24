@@ -33,17 +33,15 @@ std::vector<Network> savedNetworks(const Store& store) {
 }
 
 // Reads one word, or a "double quoted" phrase so SSIDs may contain spaces.
-static std::string nextArg(std::istringstream& in) {
+static bool nextArg(std::istringstream& in, std::string& out) {
   in >> std::ws;
   if (in.peek() != '"') {
-    std::string word;
-    in >> word;
-    return word;
+    in >> out;
+    return true;
   }
   in.get();
-  std::string phrase;
-  std::getline(in, phrase, '"');
-  return phrase;
+  std::getline(in, out, '"');
+  return !in.eof();  // false when the closing quote is missing
 }
 
 std::string handleCommand(Store& store, const std::string& line, bool allowInsecure, bool* changed) {
@@ -56,7 +54,8 @@ std::string handleCommand(Store& store, const std::string& line, bool allowInsec
     return "commands: hotspot <ssid> <pass> | wifi <ssid> <pass> (quote an ssid with spaces) | relay <wss://...> | token <crd_...> | forget | status";
   }
   if (cmd == "hotspot" || cmd == "wifi") {
-    std::string ssid = nextArg(in);
+    std::string ssid;
+    if (!nextArg(in, ssid)) return "error: missing closing quote in ssid";
     std::string pass = rest(in);
     if (ssid.empty()) return "error: ssid required";
     if (!pass.empty() && pass.size() < 8) return "error: WPA2 passwords are at least 8 characters";

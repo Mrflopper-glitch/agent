@@ -138,6 +138,8 @@ void test_provisioning_commands() {
   TEST_ASSERT_TRUE(status.find("hunter22") == std::string::npos);
   TEST_ASSERT_EQUAL_STRING("saved hotspot Sam's Phone", handleCommand(s, "hotspot \"Sam's Phone\" hunter22pass", false, &changed).c_str());
   TEST_ASSERT_EQUAL_STRING("hunter22pass", savedNetworks(s)[0].password.c_str());
+  TEST_ASSERT_TRUE(handleCommand(s, "hotspot \"Oops hunter22pass", false, &changed).rfind("error", 0) == 0);
+  TEST_ASSERT_EQUAL_STRING("hunter22pass", savedNetworks(s)[0].password.c_str());
   handleCommand(s, "forget", false, &changed);
   TEST_ASSERT_EQUAL(0, savedNetworks(s).size());
 }
