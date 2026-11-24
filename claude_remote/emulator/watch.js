@@ -174,6 +174,7 @@ async function startTalk() {
   send("audio_start", { rate: 16000 });
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
+    if (state.recording !== rec) { stream.getTracks().forEach((t) => t.stop()); return; }  // released during the permission prompt
     const ctx = new AudioContext({ sampleRate: 16000 });
     const src = ctx.createMediaStreamSource(stream);
     const node = ctx.createScriptProcessor(4096, 1, 1);
@@ -211,7 +212,7 @@ function startGame() {
   state.screen = "game";
   $("title").textContent = "Dodge";
   const canvas = el("canvas");
-  canvas.width = 420; canvas.height = 400;
+  canvas.width = 420; canvas.height = 330;
   view.replaceChildren(canvas, el("div", "chips"));
   view.lastChild.append(el("button", "chip", "Home", goHome));
   const g = { x: 210, blocks: [], score: 0, over: false, t: 0, canvas };
@@ -231,13 +232,13 @@ function stepGame(g) {
     if (g.t % Math.max(8, 24 - Math.floor(g.score / 5)) === 0) g.blocks.push({ x: 20 + Math.random() * 380, y: -20 });
     for (const b of g.blocks) b.y += 6 + g.score / 10;
     const before = g.blocks.length;
-    g.blocks = g.blocks.filter((b) => b.y < 420);
+    g.blocks = g.blocks.filter((b) => b.y < 350);
     g.score += before - g.blocks.length;
-    if (g.blocks.some((b) => Math.abs(b.x - g.x) < 34 && Math.abs(b.y - 360) < 26)) { g.over = true; buzz(); }
+    if (g.blocks.some((b) => Math.abs(b.x - g.x) < 34 && Math.abs(b.y - 290) < 26)) { g.over = true; buzz(); }
   }
-  c.fillStyle = "#0b0d10"; c.fillRect(0, 0, 420, 400);
+  c.fillStyle = "#0b0d10"; c.fillRect(0, 0, 420, 330);
   c.fillStyle = "#d97757"; for (const b of g.blocks) c.fillRect(b.x - 16, b.y - 16, 32, 32);
-  c.fillStyle = "#e8e6e3"; c.fillRect(g.x - 20, 350, 40, 20);
+  c.fillStyle = "#e8e6e3"; c.fillRect(g.x - 20, 280, 40, 20);
   c.font = "24px system-ui"; c.fillText(g.over ? `Game over: ${g.score}  (tap)` : `${g.score}`, 12, 32);
 }
 function stopGame() { if (state.game) { clearInterval(state.game.timer); state.game = null; } }
