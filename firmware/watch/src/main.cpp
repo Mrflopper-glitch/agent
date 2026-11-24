@@ -122,13 +122,11 @@ bool relayStarted = false;
 void setBacklight(bool on) {
   screenOn = on;
   ledcWrite(0, on ? kBacklightLevel : 0);
-  if (!on) touch.sleep();  // stays wakeable via its INT line
 }
 
 void wake() {
   lastActivity = millis();
   if (!screenOn) {
-    touch.wakeup();
     setBacklight(true);
     app->markDirty();
   }
@@ -277,8 +275,13 @@ void pumpSerial() {
 }
 
 void pumpTouch() {
-  int16_t x = 0, y = 0;
-  bool down = digitalRead(kPinTouchInt) == LOW && touch.getPoint(&x, &y, 1);
+  static int16_t x = 0, y = 0;  // keeps the last contact so a release lands where the finger was
+  int16_t nx = 0, ny = 0;
+  bool down = digitalRead(kPinTouchInt) == LOW && touch.getPoint(&nx, &ny, 1);
+  if (down) {
+    x = nx;
+    y = ny;
+  }
   unsigned long now = millis();
   if (down) {
     bool wasOff = !screenOn;
@@ -357,7 +360,7 @@ void loop() {
   pumpMic();
   app->tick(now);
   bool keepAwake = app->listening() || !app->approvals().empty() || app->screen() == watch::Screen::Game;
-  if (screenOn && !keepAwake && now - lastActivity > kScreenOffMs) setBacklight(false);
+  if (screenOn && !keepAwake && millis() - lastActivity > kScreenOffMs) setBacklight(false);
   if (screenOn && app->dirty()) app->render(canvas);
   delay(screenOn ? 10 : 50);  // FreeRTOS idle + Wi-Fi modem sleep do the rest
 }

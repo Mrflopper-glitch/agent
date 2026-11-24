@@ -68,6 +68,7 @@ void App::onLinkDown() {
     audioBuf_.clear();
   }
   approvals_.clear();
+  current_.clear();
   if (screen_ != Screen::Game) setScreen(Screen::Offline);
   dirty_ = true;
 }

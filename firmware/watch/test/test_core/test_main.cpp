@@ -136,6 +136,8 @@ void test_provisioning_commands() {
   TEST_ASSERT_TRUE(status.find("token: set") != std::string::npos);
   TEST_ASSERT_TRUE(status.find("crd_") == std::string::npos);
   TEST_ASSERT_TRUE(status.find("hunter22") == std::string::npos);
+  TEST_ASSERT_EQUAL_STRING("saved hotspot Sam's Phone", handleCommand(s, "hotspot \"Sam's Phone\" hunter22pass", false, &changed).c_str());
+  TEST_ASSERT_EQUAL_STRING("hunter22pass", savedNetworks(s)[0].password.c_str());
   handleCommand(s, "forget", false, &changed);
   TEST_ASSERT_EQUAL(0, savedNetworks(s).size());
 }
@@ -247,6 +249,12 @@ void test_disconnect_drops_to_offline_and_clears_approvals() {
   r.app.onLinkDown();
   TEST_ASSERT_TRUE(r.app.screen() == Screen::Offline);
   TEST_ASSERT_EQUAL(0, r.app.approvals().size());
+  r.link.up = true;
+  r.login();
+  r.recv(R"({"type":"transcript","text":"fresh start"})");
+  r.render();
+  r.tapAt(200, 220);
+  TEST_ASSERT_TRUE(r.link.sent(R"("type":"new","workspace":"repo","text":"fresh start")"));
 }
 
 void test_game_runs_offline() {

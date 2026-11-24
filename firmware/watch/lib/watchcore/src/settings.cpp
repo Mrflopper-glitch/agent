@@ -32,6 +32,20 @@ std::vector<Network> savedNetworks(const Store& store) {
   return out;
 }
 
+// Reads one word, or a "double quoted" phrase so SSIDs may contain spaces.
+static std::string nextArg(std::istringstream& in) {
+  in >> std::ws;
+  if (in.peek() != '"') {
+    std::string word;
+    in >> word;
+    return word;
+  }
+  in.get();
+  std::string phrase;
+  std::getline(in, phrase, '"');
+  return phrase;
+}
+
 std::string handleCommand(Store& store, const std::string& line, bool allowInsecure, bool* changed) {
   std::istringstream in(line);
   std::string cmd;
@@ -39,11 +53,10 @@ std::string handleCommand(Store& store, const std::string& line, bool allowInsec
   if (changed) *changed = false;
   if (cmd.empty()) return "";
   if (cmd == "help") {
-    return "commands: hotspot <ssid> <pass> | wifi <ssid> <pass> | relay <wss://...> | token <crd_...> | forget | status";
+    return "commands: hotspot <ssid> <pass> | wifi <ssid> <pass> (quote an ssid with spaces) | relay <wss://...> | token <crd_...> | forget | status";
   }
   if (cmd == "hotspot" || cmd == "wifi") {
-    std::string ssid;
-    in >> ssid;
+    std::string ssid = nextArg(in);
     std::string pass = rest(in);
     if (ssid.empty()) return "error: ssid required";
     if (!pass.empty() && pass.size() < 8) return "error: WPA2 passwords are at least 8 characters";
