@@ -20,7 +20,7 @@ def font(size, bold=False):
     try:
         return ImageFont.truetype(BOLD if bold else FONT, size)
     except OSError:
-        return ImageFont.load_default()
+        return ImageFont.load_default(size)
 
 
 def screen(out: Path) -> None:
