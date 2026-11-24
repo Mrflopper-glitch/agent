@@ -105,7 +105,9 @@ function renderCompose() {
   $("title").textContent = "New session";
   view.append(el("div", "ev status", state.transcript ? "" : "Hold the side button and speak, or type in the panel."));
   renderTranscript();
-  view.append(el("div", "chips")).append(el("button", "chip", "Back", goHome));
+  const chips = el("div", "chips");
+  chips.append(el("button", "chip", "Back", goHome));
+  view.append(chips);
 }
 
 function renderChat() {
