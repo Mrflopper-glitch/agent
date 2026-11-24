@@ -356,6 +356,19 @@ for v in VIEWS:
 # Leave the .blend in the exploded pose with every part visible and the camera on the overview.
 pose(EXPLODE, list(PARTS))
 look(*VIEWS[0]["cam"])
-bpy.ops.export_scene.gltf(filepath=str(OUT / "watch_build_guide.glb"), export_apply=True)
 bpy.ops.file.pack_all()
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT / "watch_build_guide.blend"), compress=True)
+
+# glTF is in metres: export under a 0.001 root, without the boolean cutters or guide arrows.
+root = bpy.data.objects.new("Watch (metres)", None)
+scene.collection.objects.link(root)
+root.scale = (0.001,) * 3
+helpers = set(GUIDE.all_objects)
+for o in scene.objects:
+    if o.parent is None and o is not root and o.type in {"MESH", "EMPTY"} and o not in helpers:
+        o.parent = root
+bpy.ops.object.select_all(action="DESELECT")
+for o in scene.objects:
+    if o.type in {"MESH", "EMPTY"} and o not in helpers and "cutter" not in o.name:
+        o.select_set(True)
+bpy.ops.export_scene.gltf(filepath=str(OUT / "watch_build_guide.glb"), export_apply=True, use_selection=True)
