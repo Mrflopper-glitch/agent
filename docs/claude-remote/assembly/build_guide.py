@@ -169,8 +169,8 @@ parent_all(e, c)
 e, c = part("battery", "2 Battery 502530 (spec)")
 box("LiPo 502530", (BATT[0], BATT[1], BATT[2]), (0, -2, FLOOR_T + BATT[2] / 2), c, M["battery"], 1.0)
 for i, (mat, dx) in enumerate(((M["wire_r"], -1.0), (M["wire_k"], 1.0))):
-    cyl("Battery lead", 0.45, 9, (12 + dx, 13.5, FLOOR_T + 4.0), c, mat, rot=(math.pi / 2, 0, 0), verts=12)
-box("JST plug", (5, 3, 2.4), (12, 18.5, FLOOR_T + 4.2), c, M["chip"], 0.3)
+    cyl("Battery lead", 0.45, 3.4, (12 + dx, 12.0, FLOOR_T + 4.0), c, mat, rot=(math.pi / 2, 0, 0), verts=12)
+box("JST plug", (5, 3, 2.4), (12, 15.0, FLOOR_T + 4.0), c, M["chip"], 0.3)
 parent_all(e, c)
 
 # 3. Main board with ESP32-S3 module, AXP2101, DRV2605, mic and speaker.
@@ -183,7 +183,7 @@ box("AXP2101 PMU", (5, 5, 0.9), (9.5, 8, top + 0.45), c, M["chip"])
 box("DRV2605 haptics", (3, 3, 0.9), (9.5, 0, top + 0.45), c, M["chip"])
 box("PDM mic", (3.5, 2.6, 1.2), (14, -6, top + 0.6), c, M["module"])
 box("MAX98357A speaker", (12, 3.6, 3), (8, -16.6, z - 1.6), c, M["speaker"], 0.6)
-box("Battery connector", (6, 4, 2.2), (12, 15.5, top + 1.1), c, M["chip"], 0.2)
+box("Battery connector", (6, 3, 2.0), (12, 17.0, z - 1.0), c, M["chip"], 0.2)
 parent_all(e, c)
 
 # 4. Display module: 1.54" 240x240 ST7789 with FT6336 touch on top.
