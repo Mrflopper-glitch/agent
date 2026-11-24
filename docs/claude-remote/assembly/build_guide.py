@@ -182,7 +182,7 @@ box("ESP32-S3 module (16MB flash, 8MB PSRAM)", (18, 20, 2.8), (-6, 1, top + 1.4)
 box("AXP2101 PMU", (5, 5, 0.9), (9.5, 8, top + 0.45), c, M["chip"])
 box("DRV2605 haptics", (3, 3, 0.9), (9.5, 0, top + 0.45), c, M["chip"])
 box("PDM mic", (3.5, 2.6, 1.2), (14, -6, top + 0.6), c, M["module"])
-box("MAX98357A speaker", (14, 10, 3), (8, -10.5, z - 1.6), c, M["speaker"], 0.6)
+box("MAX98357A speaker", (12, 3.6, 3), (8, -16.6, z - 1.6), c, M["speaker"], 0.6)
 box("Battery connector", (6, 4, 2.2), (12, 15.5, top + 1.1), c, M["chip"], 0.2)
 parent_all(e, c)
 
@@ -279,7 +279,7 @@ ANCHORS = {
     "back": ((CASE_W / 2 - 1, -CASE_H / 2 + 4, 4), "Back shell", "≈44 × 40 × 13 mm watch envelope", "illustrative"),
     "battery": ((-BATT[0] / 2, -2, 4), "LiPo 502530", "5 × 25 × 30 mm, ~400-470 mAh, charge ≤125 mA", "spec"),
     "board": ((-6, 6, SHELL_T + 4.3), "ESP32-S3 board", "16 MB flash, 8 MB PSRAM, AXP2101", "spec"),
-    "speaker": ((8, -15.5, SHELL_T - 1.3), "Speaker + PDM mic", "MAX98357A amp, mic on GPIO 47/44", "spec"),
+    "speaker": ((8, -16.6, SHELL_T - 1.3), "Speaker + PDM mic", "MAX98357A amp, mic on GPIO 47/44", "spec"),
     "display": ((DISPLAY_ACTIVE / 2, -6, dz + 1.6), "1.54\" display + touch", "240 × 240 ST7789, FT6336 touch", "spec"),
     "bezel": ((-CASE_W / 2 + 2, 6, bz + 2), "Front bezel + glass", "stand-in for the stock front", "illustrative"),
     "carry": ((0, CASE_H / 2 + 14.5, mid), "Pocket bow + chain", "default carry, through the top lugs", "illustrative"),
