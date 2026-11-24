@@ -92,7 +92,7 @@ class SessionManager:
         kept: list[dict] = []
         used = 0
         for event in reversed(events):
-            used += len(json.dumps(event)) + 1
+            used += len(json.dumps(event, ensure_ascii=False).encode()) + 1
             if used > max_bytes:
                 break
             kept.append(event)
