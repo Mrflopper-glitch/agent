@@ -20,10 +20,7 @@ def font(size, bold=False):
     try:
         return ImageFont.truetype(BOLD if bold else FONT, size)
     except OSError:
-        try:
-            return ImageFont.load_default(size)
-        except TypeError:  # Pillow < 10.1 has no sized default font
-            return ImageFont.load_default()
+        return ImageFont.load_default(size)  # scalable FreeType font on Pillow >= 10.1
 
 
 def screen(out: Path) -> None:
